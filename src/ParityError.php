@@ -10,11 +10,27 @@ class ParityError
     protected object $object2;
     protected string $property;
 
-    public function __construct(object $object1, object $object2, string $property)
+    /**
+     * @var mixed
+     */
+    private $object1Value;
+
+    /**
+     * @var mixed
+     */
+    private $object2Value;
+
+    /**
+     * @param mixed $object1Value
+     * @param mixed $object2Value
+     */
+    public function __construct(object $object1, object $object2, string $property, $object1Value, $object2Value)
     {
         $this->object1 = $object1;
         $this->object2 = $object2;
         $this->property = $property;
+        $this->object1Value = $object1Value;
+        $this->object2Value = $object2Value;
     }
 
     public function getObject1(): object
@@ -37,7 +53,7 @@ class ParityError
      */
     public function getObject1Value()
     {
-        return $this->object1->{$this->property};
+        return $this->object1Value;
     }
 
     /**
@@ -45,6 +61,6 @@ class ParityError
      */
     public function getObject2Value()
     {
-        return $this->object2->{$this->property};
+        return $this->object2Value;
     }
 }
