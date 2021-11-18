@@ -171,17 +171,34 @@ class ParityChecker
                     $recursionCount++;
 
                     try {
-                        $errorsHandlerRecursive = $this->doCheckParity([$valueToTest, $value], $options, $recursionCount);
+                        $errorsHandlerRecursive = $this->doCheckParity(
+                            [$valueToTest, $value],
+                            $options,
+                            $recursionCount
+                        );
+
                         $errorsHandler->addMultiples($errorsHandlerRecursive);
                     } catch (\RuntimeException $e) {
-                        $errorsHandler[] = new ParityError($valueToTest, $value, $property);
+                        $errorsHandler[] = new ParityError(
+                            $valueToTest,
+                            $value,
+                            $property,
+                            $valueToTest,
+                            $value
+                        );
                     }
 
                     $recursionCount = 0;
                 }
 
                 if (! $this->checks($valueToTest, $value, $property, $options)) {
-                    $errorsHandler[] = new ParityError($objects[$testKey], $objects[$objectKey], $property);
+                    $errorsHandler[] = new ParityError(
+                        $objects[$testKey],
+                        $objects[$objectKey],
+                        $property,
+                        $valueToTest,
+                        $value
+                    );
                 }
             }
         }
