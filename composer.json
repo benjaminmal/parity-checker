@@ -18,7 +18,7 @@
     },
     "require-dev": {
         "elodgy/coding-standard": "^1.0",
-        "phpstan/phpstan": "^1.1",
+        "phpstan/phpstan": "^1.2",
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan-symfony": "^1.0",
         "phpstan/phpstan-webmozart-assert": "^1.0",
