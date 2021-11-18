@@ -31,7 +31,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           tools: symfony
-          coverage: none
+          coverage: pcov
         env:
           COMPOSER_TOKEN: ${{ secrets.PAT }}
 
