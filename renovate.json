@@ -1,0 +1,5 @@
+{
+  "extends": [
+    "github>benjaminmal/renovate-config:library"
+  ]
+}

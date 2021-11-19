@@ -10,3 +10,4 @@
 /phpstan.neon export-ignore
 /phpstan*.neon export-ignore
 /phpunit.xml.dist export-ignore
+/renovate.json export-ignore
