@@ -30,7 +30,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          tools: symfony
           coverage: pcov
         env:
           COMPOSER_TOKEN: ${{ secrets.PAT }}
@@ -52,11 +51,6 @@ jobs:
 
       # --- 🛠 Test 🛠 ----------
 
-      - name: Validate renovate
-        uses: rinchsan/renovate-config-validator@v0.0.9
-        with:
-          pattern: 'renovate.json'
-
       - name: 'Validate composer.json and composer.lock'
         run: 'composer validate --strict --no-interaction --ansi --verbose'
 
@@ -64,10 +58,10 @@ jobs:
         run: 'vendor/bin/var-dump-check --symfony --exclude vendor --exclude tests .'
 
       - name: 'PHPStan analyse'
-        run: 'vendor/bin/phpstan analyse --configuration=phpstan-ci.neon --error-format=github --no-progress --no-interaction --verbose --ansi'
+        run: 'vendor/bin/phpstan analyse --configuration=phpstan-ci.neon --error-format=github --no-progress --no-interaction --ansi'
 
       - name: 'ECS check'
-        run: 'vendor/bin/ecs check src --no-progress-bar --no-interaction --verbose --ansi'
+        run: 'vendor/bin/ecs check src --no-progress-bar --no-interaction --ansi'
 
       - name: 'PHPUnit tests'
         run: 'vendor/bin/phpunit --verbose --coverage-clover ./coverage.xml --coverage-text --color=always --fail-on-incomplete --fail-on-risky --no-interaction --do-not-cache-result'
@@ -84,6 +78,3 @@ jobs:
           path: ~/.symfony/cache
           key: ${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}
           restore-keys: ${{ runner.os }}-php-
-
-      - name: 'Check for security vulnerabilities'
-        run: 'symfony security:check'
