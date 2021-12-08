@@ -20,7 +20,7 @@ parameters:
       path: src/ParityChecker.php
 
     -
-      message: "#^Cannot access offset ('closure'|mixed|'types_or_properties') on mixed\\.$#"
+      message: "#^Cannot access offset ('closure'|mixed|'types') on mixed\\.$#"
       count: 2
       path: src/ParityChecker.php
 

@@ -121,7 +121,7 @@ class ParityCheckerTest extends TestCase
         $object2->param6 = new \StdClass();
 
         $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], ['no_check_on' => $types]);
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::IGNORE_TYPES_KEY => $types]);
 
         $this->assertCount(count($expectedErrorParams), $errors);
 
@@ -161,7 +161,7 @@ class ParityCheckerTest extends TestCase
         $this->assertCount(3, $strictErrors);
 
         $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], ['loose_check_on' => ['string', 'int', 'array', 'float']]);
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::LOOSE_CHECK_TYPES_KEY => ['string', 'int', 'array', 'float']]);
 
         $this->assertCount(0, $errors);
     }
@@ -187,7 +187,7 @@ class ParityCheckerTest extends TestCase
         $this->assertCount(3, $strictErrors);
 
         $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], ['ignore_properties' => ['param1', 'param2']]);
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::IGNORE_TYPES_KEY => ['$param1', '$param2']]);
 
         $this->assertCount(1, $errors);
     }
@@ -214,10 +214,10 @@ class ParityCheckerTest extends TestCase
 
         $parityChecker = ParityChecker::create();
         $errors = $parityChecker->checkParity([$object1, $object2], [
-            'custom_checkers' => [
+            ParityChecker::CALLBACK_CHECKER_KEY => [
                 'checker1' => [
-                    'types_or_properties' => ['$param1', '$param2', '$param3'],
-                    'closure' => fn ($value1, $value2, string $property, array $options): bool => false,
+                    ParityChecker::CALLBACK_TYPES_KEY => ['$param1', '$param2', '$param3'],
+                    ParityChecker::CALLBACK_CLOSURE_KEY => fn ($value1, $value2, string $property, array $options): bool => false,
                 ]
             ]
         ]);
@@ -266,7 +266,7 @@ class ParityCheckerTest extends TestCase
         $object2->deepObject = $deepObject2;
 
         $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], ['deep_object_limit' => 2]);
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::DEEP_OBJECT_LIMIT_KEY => 2]);
 
         $this->assertCount(0, $errors);
     }
@@ -312,7 +312,7 @@ class ParityCheckerTest extends TestCase
         $object2->deepObject = $deepObject2;
 
         $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], ['deep_object_limit' => 2]);
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::DEEP_OBJECT_LIMIT_KEY => 2]);
 
         $this->assertCount(1, $errors);
         $this->assertSame($deepObject1->childDeepObject, $errors[0]->getObject1());
@@ -354,7 +354,7 @@ class ParityCheckerTest extends TestCase
         $object2->deepObject = $deepObject2;
 
         $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], ['deep_object_limit' => 2]);
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::DEEP_OBJECT_LIMIT_KEY => 2]);
 
         $this->assertCount(1, $errors);
         $this->assertSame($deepObject1->childDeepObject, $errors[0]->getObject1());
@@ -377,7 +377,7 @@ class ParityCheckerTest extends TestCase
         };
 
         $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], ['no_check_on' => ['$param2', '$param3']]);
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::IGNORE_TYPES_KEY => ['$param2', '$param3']]);
 
         $this->assertCount(1, $errors);
         $this->assertSame('param1', $errors[0]->getProperty());
@@ -402,7 +402,7 @@ class ParityCheckerTest extends TestCase
         $object2->param3 = new \DateTimeImmutable();
 
         $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], ['no_check_on' => [\DateTimeInterface::class]]);
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::IGNORE_TYPES_KEY => [\DateTimeInterface::class]]);
 
         $this->assertCount(2, $errors);
         $this->assertSame('param1', $errors[0]->getProperty());
@@ -428,7 +428,7 @@ class ParityCheckerTest extends TestCase
         $object2->param3 = new \DateTimeImmutable();
 
         $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], ['no_check_on' => [\DateTimeImmutable::class]]);
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::IGNORE_TYPES_KEY => [\DateTimeImmutable::class]]);
 
         $this->assertCount(2, $errors);
         $this->assertSame('param1', $errors[0]->getProperty());
@@ -470,7 +470,7 @@ class ParityCheckerTest extends TestCase
         $object2->param9 = tmpfile();
 
         $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], ['no_check_on' => ['int', 'float', 'array', 'callable', 'resource', 'null', 'object', 'iterable']]);
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::IGNORE_TYPES_KEY => ['int', 'float', 'array', 'callable', 'resource', 'null', 'object', 'iterable']]);
 
         $this->assertCount(1, $errors);
     }
@@ -479,10 +479,10 @@ class ParityCheckerTest extends TestCase
     public function parityCheckWithWrongType(): void
     {
         $this->expectException(InvalidOptionsException::class);
-        $this->expectExceptionMessage('The option "no_check_on" with value array is invalid.');
+        $this->expectExceptionMessage('The option "ignore_types" with value array is invalid.');
 
         $parityChecker = ParityChecker::create();
-        $parityChecker->checkParity([], ['no_check_on' => ['wrong_type_or_class_or_interface_or_property']]);
+        $parityChecker->checkParity([], [ParityChecker::IGNORE_TYPES_KEY => ['wrong_type_or_class_or_interface_or_property']]);
     }
 
     public function noCheckOnTypesProvider(): array
