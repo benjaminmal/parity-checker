@@ -187,7 +187,7 @@ class ParityCheckerTest extends TestCase
         $this->assertCount(3, $strictErrors);
 
         $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::IGNORE_TYPES_KEY => ['param1', 'param2']]);
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::IGNORE_TYPES_KEY => ['$param1', '$param2']]);
 
         $this->assertCount(1, $errors);
     }
