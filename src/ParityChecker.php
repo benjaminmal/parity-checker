@@ -87,18 +87,7 @@ class ParityChecker
 
     protected function configureOption(OptionsResolver $resolver): void
     {
-        $typeClosure = function (array $values): bool {
-            foreach ($values as $value) {
-                if (false === $this->isProperty($value)
-                    && false === $this->isType($value)
-                    && false === $this->isClassOrInterface($value)
-                ) {
-                    return false;
-                }
-            }
-
-            return true;
-        };
+        $typeClosure = \Closure::fromCallable([$this, 'optionsTypeValidation']);
 
         $resolver
             ->define('no_check_on')
@@ -338,5 +327,28 @@ class ParityChecker
         $function = "is_$value";
 
         return function_exists($function) ? $function : false;
+    }
+
+    /**
+     * @param string[]|string $values
+     */
+    private function optionsTypeValidation($values): bool
+    {
+        if (is_array($values)) {
+            foreach ($values as $value) {
+                if (! $this->doOptionsTypeValidation($value)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return $this->doOptionsTypeValidation($values);
+    }
+
+    private function doOptionsTypeValidation(string $value): bool
+    {
+        return $this->isProperty($value) || $this->isType($value) || $this->isClassOrInterface($value);
     }
 }
