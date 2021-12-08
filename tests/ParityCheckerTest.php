@@ -98,7 +98,7 @@ class ParityCheckerTest extends TestCase
      * @test
      * @dataProvider noCheckOnTypesProvider
      */
-    public function checkParityErrorsWithNoCheckOn(array $types, array $expectedErrorParams): void
+    public function checkParityErrorsWithNoCheckOn($types, array $expectedErrorParams): void
     {
         $object1 = new class () {
             public string $param1 = 'mock_string';
@@ -489,7 +489,7 @@ class ParityCheckerTest extends TestCase
     {
         return [
             [[], ['param1', 'param2', 'param3', 'param4', 'param5', 'param6']],
-            [['string'], ['param2', 'param3', 'param4', 'param5', 'param6']],
+            ['string', ['param2', 'param3', 'param4', 'param5', 'param6']],
             [['int'], ['param1', 'param3', 'param4', 'param5', 'param6']],
             [['float'], ['param1', 'param2', 'param4', 'param5', 'param6']],
             [['array'], ['param1', 'param2', 'param3', 'param6']],

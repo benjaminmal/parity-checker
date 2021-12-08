@@ -62,21 +62,21 @@ class ParityChecker
      */
     protected function checks($value1, $value2, string $property, array $options): bool
     {
-        foreach ($options['no_check_on'] as $typeOrProperty) {
-            if ($this->isTypeOrProperty($typeOrProperty, $value1, $value2, $property)) {
-                return true;
-            }
+        if (array_key_exists('no_check_on', $options)
+            && $this->isTypeOrProperty($options['no_check_on'], $value1, $value2, $property)
+        ) {
+            return true;
         }
 
-        foreach ($options['loose_check_on'] as $typeOrProperty) {
-            if ($this->isTypeOrProperty($typeOrProperty, $value1, $value2, $property)) {
-                return $value1 == $value2;
-            }
+        if (array_key_exists('loose_check_on', $options)
+            && $this->isTypeOrProperty($options['loose_check_on'], $value1, $value2, $property)
+        ) {
+            return $value1 == $value2;
         }
 
-        foreach ($options['custom_checkers'] as $checker) {
-            foreach ($checker['types_or_properties'] as $typeOrProperty) {
-                if ($this->isTypeOrProperty($typeOrProperty, $value1, $value2, $property)) {
+        if (array_key_exists('custom_checkers', $options)) {
+            foreach ($options['custom_checkers'] as $checker) {
+                if ($this->isTypeOrProperty($checker['types_or_properties'], $value1, $value2, $property)) {
                     return $checker['closure']($value1, $value2, $property, $options);
                 }
             }
@@ -103,13 +103,13 @@ class ParityChecker
         $resolver
             ->define('no_check_on')
             ->default(['object'])
-            ->allowedTypes('string[]')
+            ->allowedTypes('string[]', 'string')
             ->allowedValues($typeClosure);
 
         $resolver
             ->define('loose_check_on')
             ->default([])
-            ->allowedTypes('string[]')
+            ->allowedTypes('string[]', 'string')
             ->allowedValues($typeClosure);
 
         $resolver
@@ -129,7 +129,7 @@ class ParityChecker
                 $resolver
                     ->define('types_or_properties')
                     ->required()
-                    ->allowedTypes('string[]')
+                    ->allowedTypes('string[]', 'string')
                     ->allowedValues($typeClosure);
 
                 $resolver
@@ -207,11 +207,22 @@ class ParityChecker
     }
 
     /**
+     * @param string[]|string $type
      * @param mixed $value1
      * @param mixed $value2
      */
-    private function isTypeOrProperty(string $type, $value1, $value2, string $property): bool
+    private function isTypeOrProperty($type, $value1, $value2, string $property): bool
     {
+        if (is_array($type)) {
+            foreach ($type as $type1) {
+                if ($this->isTypeOrProperty($type1, $value1, $value2, $property)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         // '$parameter' will be evaluated to 'parameter' property
         if (false !== ($resolvedProperty = $this->isProperty($type))) {
             return $resolvedProperty === $property;
