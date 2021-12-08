@@ -167,32 +167,6 @@ class ParityCheckerTest extends TestCase
     }
 
     /** @test */
-    public function checkParityWithIgnoreProperties(): void
-    {
-        $object1 = new class () {
-            public int $param1 = 12;
-            public float $param2 = 10.0;
-            public array $param3 = ['key1' => 'value1', 'key2' => 'value2'];
-        };
-
-        $object2 = new class () {
-            public string $param1 = '12';
-            public string $param2 = '10.0';
-            public array $param3 = ['key2' => 'value2', 'key1' => 'value1'];
-        };
-
-        $parityChecker = ParityChecker::create();
-        $strictErrors = $parityChecker->checkParity([$object1, $object2]);
-
-        $this->assertCount(3, $strictErrors);
-
-        $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::IGNORE_TYPES_KEY => ['$param1', '$param2']]);
-
-        $this->assertCount(1, $errors);
-    }
-
-    /** @test */
     public function checkParityWithCustomChecker(): void
     {
         $object1 = new class () {

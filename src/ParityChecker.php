@@ -108,10 +108,6 @@ class ParityChecker
             ->allowedValues($typeClosure);
 
         $resolver
-            ->define('ignore_properties')
-            ->allowedTypes('string[]');
-
-        $resolver
             ->define(self::DEEP_OBJECT_LIMIT_KEY)
             ->default(0)
             ->allowedTypes('int');
