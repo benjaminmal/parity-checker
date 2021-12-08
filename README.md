@@ -37,10 +37,10 @@ Usages
 ```php
 $errors = $parityChecker->checkParity([$object1, $object2], [
     // Do not perform check on these types
-    'no_check_on' => ['object', 'resource', \DateTimeInterface::class, '$objectProperty1'],
+    'ignore_types' => ['object', 'resource', \DateTimeInterface::class, '$objectProperty1'],
     
     // Perform a loose check ('==' instead of '===') on theses types
-    'loose_check_on' => 'array',
+    'loose_types' => 'array',
 
     // Set the recursion limit for objects
     'deep_object_limit' => 0,
@@ -49,7 +49,7 @@ $errors = $parityChecker->checkParity([$object1, $object2], [
     'custom_checkers' => [
         'my-checker' => [
             // Required. Types to perform the closure on
-            'types_or_properties' => '$property',
+            'types' => '$property',
             
             // Required. Closure with $values, $property, $options. Must return bool.
             'closure' => function ($value1, $value2, string $property, array $options): bool {
@@ -61,10 +61,10 @@ $errors = $parityChecker->checkParity([$object1, $object2], [
 ```
 | Option              | Description                                                    | Accepted types                                                                                                                               | Default values  |
 |---------------------|----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
-| `no_check_on`       | Do not perform check on these types                            | `string[]\|string`. Can be any types. Checked by the `is_` functions, classes/interfaces names or object properties (must be prefixed by `$`) |`'object'`       |
-| `loose_check_on`    | On which type to perform loose check (`==`) instead of (`===`) | `string[]\|string`. Can be any types. Checked by the `is_` functions, classes/interfaces names or object properties (must be prefixed by `$`) | none            |
+| `ignore_types`       | Do not perform check on these types                            | `string[]\|string`. Can be any types. Checked by the `is_` functions, classes/interfaces names or object properties (must be prefixed by `$`) |`'object'`       |
+| `loose_types`    | On which type to perform loose check (`==`) instead of (`===`) | `string[]\|string`. Can be any types. Checked by the `is_` functions, classes/interfaces names or object properties (must be prefixed by `$`) | none            |
 | `deep_object_limit` | The object recursion limit                                     | `int`                                                                                                                                        | `0`             |
-| `custom_checkers`   | You can set you own checker which replace other                | ['my-own-checker' => ['types_or_properties' => [], 'closure' => fn (): bool => true]                                                         | none            |
+| `custom_checkers`   | You can set you own checker which replace other                | ['my-own-checker' => ['types' => [], 'closure' => fn (): bool => true]                                                         | none            |
 
 ### Errors
 ```php

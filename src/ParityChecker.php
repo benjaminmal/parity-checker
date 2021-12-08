@@ -14,11 +14,11 @@ use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 
 class ParityChecker
 {
-    public const IGNORE_TYPES_KEY = 'no_check_on';
-    public const LOOSE_CHECK_TYPES_KEY = 'loose_check_on';
+    public const IGNORE_TYPES_KEY = 'ignore_types';
+    public const LOOSE_CHECK_TYPES_KEY = 'loose_types';
     public const DEEP_OBJECT_LIMIT_KEY = 'deep_object_limit';
     public const CALLBACK_CHECKER_KEY = 'callback_checker';
-    public const CALLBACK_TYPES_KEY = 'types_or_properties';
+    public const CALLBACK_TYPES_KEY = 'types';
     public const CALLBACK_CLOSURE_KEY = 'closure';
 
     protected PropertyAccessorInterface $propertyAccessor;

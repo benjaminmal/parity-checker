@@ -187,7 +187,7 @@ class ParityCheckerTest extends TestCase
         $this->assertCount(3, $strictErrors);
 
         $parityChecker = ParityChecker::create();
-        $errors = $parityChecker->checkParity([$object1, $object2], ['ignore_properties' => ['param1', 'param2']]);
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::IGNORE_TYPES_KEY => ['param1', 'param2']]);
 
         $this->assertCount(1, $errors);
     }
@@ -479,7 +479,7 @@ class ParityCheckerTest extends TestCase
     public function parityCheckWithWrongType(): void
     {
         $this->expectException(InvalidOptionsException::class);
-        $this->expectExceptionMessage('The option "no_check_on" with value array is invalid.');
+        $this->expectExceptionMessage('The option "ignore_types" with value array is invalid.');
 
         $parityChecker = ParityChecker::create();
         $parityChecker->checkParity([], [ParityChecker::IGNORE_TYPES_KEY => ['wrong_type_or_class_or_interface_or_property']]);
