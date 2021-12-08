@@ -61,8 +61,8 @@ $errors = $parityChecker->checkParity([$object1, $object2], [
 ```
 | Option              | Description                                                    | Accepted types                                                                                                                               | Default values  |
 |---------------------|----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
-| `no_check_on`       | Do not perform check on these types                            | `string[]|string`. Can be any types. Checked by the `is_` functions, classes/interfaces names or object properties (must be prefixed by `$`) |`'object'`       |
-| `loose_check_on`    | On which type to perform loose check (`==`) instead of (`===`) | `string[]|string`. Can be any types. Checked by the `is_` functions, classes/interfaces names or object properties (must be prefixed by `$`) | none            |
+| `no_check_on`       | Do not perform check on these types                            | `string[]\|string`. Can be any types. Checked by the `is_` functions, classes/interfaces names or object properties (must be prefixed by `$`) |`'object'`       |
+| `loose_check_on`    | On which type to perform loose check (`==`) instead of (`===`) | `string[]\|string`. Can be any types. Checked by the `is_` functions, classes/interfaces names or object properties (must be prefixed by `$`) | none            |
 | `deep_object_limit` | The object recursion limit                                     | `int`                                                                                                                                        | `0`             |
 | `custom_checkers`   | You can set you own checker which replace other                | ['my-own-checker' => ['types_or_properties' => [], 'closure' => fn (): bool => true]                                                         | none            |
 
