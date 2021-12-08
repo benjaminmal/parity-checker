@@ -97,13 +97,11 @@ class ParityChecker
 
         $resolver
             ->define('loose_check_on')
-            ->default([])
             ->allowedTypes('string[]', 'string')
             ->allowedValues($typeClosure);
 
         $resolver
             ->define('ignore_properties')
-            ->default([])
             ->allowedTypes('string[]');
 
         $resolver
