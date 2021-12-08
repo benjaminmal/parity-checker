@@ -16,7 +16,7 @@ parameters:
 
     -
       message: "#^Parameter \\#1 \\$type of method Elodgy\\\\ParityChecker\\\\ParityChecker\\:\\:isTypeOrProperty\\(\\) expects array\\<string\\>\\|string, mixed given\\.$#"
-      count: 3
+      count: 4
       path: src/ParityChecker.php
 
     -
