@@ -14,6 +14,13 @@ use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 
 class ParityChecker
 {
+    public const IGNORE_TYPES_KEY = 'no_check_on';
+    public const LOOSE_CHECK_TYPES_KEY = 'loose_check_on';
+    public const DEEP_OBJECT_LIMIT_KEY = 'deep_object_limit';
+    public const CALLBACK_CHECKER_KEY = 'callback_checker';
+    public const CALLBACK_TYPES_KEY = 'types_or_properties';
+    public const CALLBACK_CLOSURE_KEY = 'closure';
+
     protected PropertyAccessorInterface $propertyAccessor;
     protected PropertyInfoExtractorInterface $propertyInfoExtractor;
 
@@ -62,22 +69,22 @@ class ParityChecker
      */
     protected function checks($value1, $value2, string $property, array $options): bool
     {
-        if (array_key_exists('no_check_on', $options)
-            && $this->isTypeOrProperty($options['no_check_on'], $value1, $value2, $property)
+        if (array_key_exists(self::IGNORE_TYPES_KEY, $options)
+            && $this->isTypeOrProperty($options[self::IGNORE_TYPES_KEY], $value1, $value2, $property)
         ) {
             return true;
         }
 
-        if (array_key_exists('loose_check_on', $options)
-            && $this->isTypeOrProperty($options['loose_check_on'], $value1, $value2, $property)
+        if (array_key_exists(self::LOOSE_CHECK_TYPES_KEY, $options)
+            && $this->isTypeOrProperty($options[self::LOOSE_CHECK_TYPES_KEY], $value1, $value2, $property)
         ) {
             return $value1 == $value2;
         }
 
-        if (array_key_exists('custom_checkers', $options)) {
-            foreach ($options['custom_checkers'] as $checker) {
-                if ($this->isTypeOrProperty($checker['types_or_properties'], $value1, $value2, $property)) {
-                    return $checker['closure']($value1, $value2, $property, $options);
+        if (array_key_exists(self::CALLBACK_CHECKER_KEY, $options)) {
+            foreach ($options[self::CALLBACK_CHECKER_KEY] as $checker) {
+                if ($this->isTypeOrProperty($checker[self::CALLBACK_TYPES_KEY], $value1, $value2, $property)) {
+                    return $checker[self::CALLBACK_CLOSURE_KEY]($value1, $value2, $property, $options);
                 }
             }
         }
@@ -90,13 +97,13 @@ class ParityChecker
         $typeClosure = \Closure::fromCallable([$this, 'optionsTypeValidation']);
 
         $resolver
-            ->define('no_check_on')
+            ->define(self::IGNORE_TYPES_KEY)
             ->default(['object'])
             ->allowedTypes('string[]', 'string')
             ->allowedValues($typeClosure);
 
         $resolver
-            ->define('loose_check_on')
+            ->define(self::LOOSE_CHECK_TYPES_KEY)
             ->allowedTypes('string[]', 'string')
             ->allowedValues($typeClosure);
 
@@ -105,22 +112,22 @@ class ParityChecker
             ->allowedTypes('string[]');
 
         $resolver
-            ->define('deep_object_limit')
+            ->define(self::DEEP_OBJECT_LIMIT_KEY)
             ->default(0)
             ->allowedTypes('int');
 
         $resolver
-            ->define('custom_checkers')
+            ->define(self::CALLBACK_CHECKER_KEY)
             ->default(static function (OptionsResolver $resolver) use ($typeClosure): void {
                 $resolver->setPrototype(true);
                 $resolver
-                    ->define('types_or_properties')
+                    ->define(self::CALLBACK_TYPES_KEY)
                     ->required()
                     ->allowedTypes('string[]', 'string')
                     ->allowedValues($typeClosure);
 
                 $resolver
-                    ->define('closure')
+                    ->define(self::CALLBACK_CLOSURE_KEY)
                     ->required()
                     ->allowedTypes(\Closure::class);
             });
@@ -153,7 +160,7 @@ class ParityChecker
 
                 if (is_object($valueToTest)
                     && is_object($value)
-                    && $options['deep_object_limit'] > $recursionCount
+                    && $options[self::DEEP_OBJECT_LIMIT_KEY] > $recursionCount
                 ) {
                     $recursionCount++;
 
@@ -239,12 +246,12 @@ class ParityChecker
             $properties[] = $this->propertyInfoExtractor->getProperties(get_class($object)) ?? [];
         }
 
-        if (! empty($options['ignore_properties'])) {
+        if (! empty($options[self::IGNORE_TYPES_KEY])) {
             foreach ($properties as $key => $objectProperties) {
                 $properties[$key] = array_filter(
                     $objectProperties,
                     static fn (string $property): bool =>
-                    ! in_array($property, $options['ignore_properties'], true)
+                    ! in_array($property, $options[self::IGNORE_TYPES_KEY], true)
                 );
             }
         }
