@@ -246,12 +246,13 @@ class ParityChecker
             $properties[] = $this->propertyInfoExtractor->getProperties(get_class($object)) ?? [];
         }
 
-        if (! empty($options[self::IGNORE_TYPES_KEY])) {
+        if (array_key_exists(self::IGNORE_TYPES_KEY, $options)) {
+            $types = $options[self::IGNORE_TYPES_KEY];
             foreach ($properties as $key => $objectProperties) {
                 $properties[$key] = array_filter(
                     $objectProperties,
                     static fn (string $property): bool =>
-                    ! in_array($property, $options[self::IGNORE_TYPES_KEY], true)
+                        is_string($types) ? $types !== $property : ! in_array($property, $types, true),
                 );
             }
         }
