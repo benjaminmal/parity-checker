@@ -459,6 +459,55 @@ class ParityCheckerTest extends TestCase
         $parityChecker->checkParity([], [ParityChecker::IGNORE_TYPES_KEY => ['wrong_type_or_class_or_interface_or_property']]);
     }
 
+    /** @test */
+    public function parityCheckWithOnlyTypes(): void
+    {
+        $object1 = new class () {
+            public int $param1 = 12;
+            public float $param2 = 10.0;
+            public string $param3 = 'mock';
+        };
+
+        $object2 = new class () {
+            public int $param1 = 99;
+            public float $param2 = 99.9;
+            public string $param3 = 'mock';
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [ParityChecker::ONLY_TYPES_KEY => '$param3']);
+
+        $this->assertCount(0, $errors);
+        $this->assertFalse($errors->hasErrors());
+    }
+
+    /** @test */
+    public function parityCheckWithOnlyTypesAndIgnoreTypes(): void
+    {
+        $object1 = new class () {
+            public int $param1 = 12;
+            public float $param2 = 10.0;
+            public string $param3 = 'mock';
+            public array $param4 = ['mock'];
+        };
+
+        $object2 = new class () {
+            public int $param1 = 99;
+            public float $param2 = 99.9;
+            public string $param3 = 'mock';
+            public array $param4 = [];
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => '$param4',
+            ParityChecker::ONLY_TYPES_KEY => ['$param3', '$param4'],
+        ]);
+
+        $this->assertCount(0, $errors);
+        $this->assertFalse($errors->hasErrors());
+    }
+
     public function noCheckOnTypesProvider(): array
     {
         return [

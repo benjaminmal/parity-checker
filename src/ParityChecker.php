@@ -15,6 +15,7 @@ use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 class ParityChecker
 {
     public const IGNORE_TYPES_KEY = 'ignore_types';
+    public const ONLY_TYPES_KEY = 'only_types';
     public const LOOSE_CHECK_TYPES_KEY = 'loose_types';
     public const DEEP_OBJECT_LIMIT_KEY = 'deep_object_limit';
     public const CALLBACK_CHECKER_KEY = 'callback_checker';
@@ -75,6 +76,12 @@ class ParityChecker
             return true;
         }
 
+        if (array_key_exists(self::ONLY_TYPES_KEY, $options)
+            && ! $this->isTypeOrProperty($options[self::ONLY_TYPES_KEY], $value1, $value2, $property)
+        ) {
+            return true;
+        }
+
         if (array_key_exists(self::LOOSE_CHECK_TYPES_KEY, $options)
             && $this->isTypeOrProperty($options[self::LOOSE_CHECK_TYPES_KEY], $value1, $value2, $property)
         ) {
@@ -99,6 +106,11 @@ class ParityChecker
         $resolver
             ->define(self::IGNORE_TYPES_KEY)
             ->default(['object'])
+            ->allowedTypes('string[]', 'string')
+            ->allowedValues($typeClosure);
+
+        $resolver
+            ->define(self::ONLY_TYPES_KEY)
             ->allowedTypes('string[]', 'string')
             ->allowedValues($typeClosure);
 
