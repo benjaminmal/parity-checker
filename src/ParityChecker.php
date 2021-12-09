@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Elodgy\ParityChecker;
 
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
@@ -25,6 +26,7 @@ class ParityChecker
     public const DATA_MAPPER_KEY = 'data_mapper';
     public const DATA_MAPPER_TYPES_KEY = 'types';
     public const DATA_MAPPER_CLOSURE_KEY = 'closure';
+    public const DATETIME_CHECK_FORMAT_KEY = 'datetime_check_format';
 
     private const TYPES_ALLOWED_TYPES = ['string[]', 'string'];
 
@@ -142,6 +144,11 @@ class ParityChecker
             ->allowedTypes('int');
 
         $resolver
+            ->define(self::DATETIME_CHECK_FORMAT_KEY)
+            ->default('Y-m-d H:i:s')
+            ->allowedTypes('string');
+
+        $resolver
             ->define(self::DATA_MAPPER_KEY)
             ->default(static function (OptionsResolver $mapperResolver) use ($typeClosure): void {
                 $mapperResolver->setPrototype(true);
@@ -155,8 +162,22 @@ class ParityChecker
                     ->define(self::DATA_MAPPER_CLOSURE_KEY)
                     ->required()
                     ->allowedTypes(\Closure::class);
-            });
+            })
+            ->default(static fn (Options $options): array => [
+                'datetime_mapper' => [
+                    'types' => [\DateTime::class, \DateTimeImmutable::class],
+                    'closure' => static function ($dateTime) use ($options) {
+                        /** @var \DateTime|\DateTimeImmutable $dateTime */
+                        if ($dateTime instanceof \DateTime) {
+                            $dateTime = \DateTimeImmutable::createFromMutable($dateTime);
+                        }
 
+                        $dateTime = $dateTime->setTimezone(new \DateTimeZone('UTC'));
+
+                        return $dateTime->format($options[self::DATETIME_CHECK_FORMAT_KEY]);
+                    },
+                ],
+            ]);
 
         $resolver
             ->define(self::CALLBACK_CHECKER_KEY)
