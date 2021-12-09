@@ -720,6 +720,7 @@ class ParityCheckerTest extends TestCase
         $parityChecker = ParityChecker::create();
         $errors = $parityChecker->checkParity([$object1, $object2], [
             ParityChecker::IGNORE_TYPES_KEY => [],
+            ParityChecker::DATETIME_CHECK_FORMAT_KEY => true,
         ]);
 
         $this->assertCount(0, $errors);
@@ -777,6 +778,7 @@ class ParityCheckerTest extends TestCase
         $parityChecker = ParityChecker::create();
         $errors = $parityChecker->checkParity([$object1, $object2], [
             ParityChecker::IGNORE_TYPES_KEY => [],
+            ParityChecker::DATETIME_CHECK_FORMAT_KEY => true,
         ]);
 
         $this->assertCount(0, $errors);

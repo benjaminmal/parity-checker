@@ -90,7 +90,9 @@ class ParityChecker
             return true;
         }
 
-        if (array_key_exists(self::DATETIME_CHECK_FORMAT_KEY, $options)) {
+        if (array_key_exists(self::DATETIME_CHECK_FORMAT_KEY, $options)
+            && false !== $options[self::DATETIME_CHECK_FORMAT_KEY]
+        ) {
             $options[self::DATA_MAPPER_KEY]['elodgy_internal_datetime_mapper'] = [
                 'types' => [\DateTime::class, \DateTimeImmutable::class],
                 'closure' => static function ($dateTime) use ($options) {
@@ -99,11 +101,13 @@ class ParityChecker
                         $dateTime = \DateTimeImmutable::createFromMutable($dateTime);
                     }
 
-                    /** @var string $format */
-                    $format = $options[self::DATETIME_CHECK_FORMAT_KEY];
                     $dateTime = $dateTime->setTimezone(new \DateTimeZone('UTC'));
 
-                    return $dateTime->format($format);
+                    return $dateTime->format(
+                        is_string($options[self::DATETIME_CHECK_FORMAT_KEY])
+                            ? $options[self::DATETIME_CHECK_FORMAT_KEY]
+                            : 'Y-m-d H:i:s'
+                    );
                 },
             ];
         }
@@ -164,7 +168,7 @@ class ParityChecker
         $resolver
             ->define(self::DATETIME_CHECK_FORMAT_KEY)
             ->default('Y-m-d H:i:s')
-            ->allowedTypes('string');
+            ->allowedTypes('string', 'bool');
 
         $resolver
             ->define(self::DATA_MAPPER_KEY)
