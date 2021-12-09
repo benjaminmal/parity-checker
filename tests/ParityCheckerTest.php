@@ -653,8 +653,8 @@ class ParityCheckerTest extends TestCase
             public \DateTimeImmutable $dateTimeImmutable;
 
             public function __construct() {
-                $this->dateTime = new \DateTime();
-                $this->dateTimeImmutable = new \DateTimeImmutable();
+                $this->dateTime = new \DateTime('2021-06-21 12:00:00');
+                $this->dateTimeImmutable = new \DateTimeImmutable('2021-06-21 12:00:00');
             }
         };
 
@@ -663,8 +663,8 @@ class ParityCheckerTest extends TestCase
             public \DateTimeImmutable $dateTimeImmutable;
 
             public function __construct() {
-                $this->dateTime = new \DateTime('+2days');
-                $this->dateTimeImmutable = new \DateTimeImmutable('+2days');
+                $this->dateTime = new \DateTime('2021-06-21 10:00:00');
+                $this->dateTimeImmutable = new \DateTimeImmutable('2021-06-21 10:00:00');
             }
         };
 
@@ -682,8 +682,8 @@ class ParityCheckerTest extends TestCase
                 $this->assertInstanceOf(\DateTime::class, $error->getObject2Value());
 
                 // Check if datetime has changed
-                $this->assertSame((new \DateTime())->format('d'), $error->getObject1Value()->format('d'));
-                $this->assertSame((new \DateTime('+2days'))->format('d'), $error->getObject2Value()->format('d'));
+                $this->assertEquals(12, $error->getObject1Value()->format('H'));
+                $this->assertEquals(10, $error->getObject2Value()->format('H'));
             } else {
                 $this->assertInstanceOf(\DateTimeImmutable::class, $error->getObject1Value());
                 $this->assertInstanceOf(\DateTimeImmutable::class, $error->getObject2Value());
@@ -733,7 +733,7 @@ class ParityCheckerTest extends TestCase
             public \DateTimeImmutable $dateTimeImmutable;
 
             public function __construct() {
-                $this->dateTimeImmutable = new \DateTimeImmutable();
+                $this->dateTimeImmutable = new \DateTimeImmutable('2021-02-01 05:00:00');
             }
         };
 
@@ -741,7 +741,7 @@ class ParityCheckerTest extends TestCase
             public \DateTimeImmutable $dateTimeImmutable;
 
             public function __construct() {
-                $this->dateTimeImmutable = new \DateTimeImmutable('+2hours');
+                $this->dateTimeImmutable = new \DateTimeImmutable('2021-02-01 05:00:01');
             }
         };
 
