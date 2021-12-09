@@ -22,6 +22,9 @@ class ParityChecker
     public const CALLBACK_CHECKER_KEY = 'callback_checker';
     public const CALLBACK_TYPES_KEY = 'types';
     public const CALLBACK_CLOSURE_KEY = 'closure';
+    public const DATA_MAPPER_KEY = 'data_mapper';
+    public const DATA_MAPPER_TYPES_KEY = 'types';
+    public const DATA_MAPPER_CLOSURE_KEY = 'closure';
 
     private const TYPES_ALLOWED_TYPES = ['string[]', 'string'];
 
@@ -85,6 +88,17 @@ class ParityChecker
             return true;
         }
 
+        if (array_key_exists(self::DATA_MAPPER_KEY, $options)) {
+            foreach ($options[self::DATA_MAPPER_KEY] as $mapper) {
+                if ($this->isTypeOrProperty($mapper[self::DATA_MAPPER_TYPES_KEY], $value1, $value2, $property)) {
+                    $value1 = $mapper[self::DATA_MAPPER_CLOSURE_KEY]($value1, $property, $options);
+                    $value2 = $mapper[self::DATA_MAPPER_CLOSURE_KEY]($value2, $property, $options);
+
+                    break;
+                }
+            }
+        }
+
         if (array_key_exists(self::LOOSE_CHECK_TYPES_KEY, $options)
             && $this->isTypeOrProperty($options[self::LOOSE_CHECK_TYPES_KEY], $value1, $value2, $property)
         ) {
@@ -126,6 +140,23 @@ class ParityChecker
             ->define(self::DEEP_OBJECT_LIMIT_KEY)
             ->default(0)
             ->allowedTypes('int');
+
+        $resolver
+            ->define(self::DATA_MAPPER_KEY)
+            ->default(static function (OptionsResolver $mapperResolver) use ($typeClosure): void {
+                $mapperResolver->setPrototype(true);
+                $mapperResolver
+                    ->define(self::DATA_MAPPER_TYPES_KEY)
+                    ->required()
+                    ->allowedTypes(...self::TYPES_ALLOWED_TYPES)
+                    ->allowedValues($typeClosure);
+
+                $mapperResolver
+                    ->define(self::DATA_MAPPER_CLOSURE_KEY)
+                    ->required()
+                    ->allowedTypes(\Closure::class);
+            });
+
 
         $resolver
             ->define(self::CALLBACK_CHECKER_KEY)

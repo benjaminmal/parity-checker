@@ -552,6 +552,99 @@ class ParityCheckerTest extends TestCase
         $this->assertFalse($errors->hasErrors());
     }
 
+    /** @test */
+    public function parityCheckerWithDataMapper(): void
+    {
+        $object1 = new class () {
+            public int $param1 = 99;
+            public object $paramObject;
+
+            public function __construct() {
+                $this->paramObject = new class() {
+                    public function getName(): string {
+                        return 'hello';
+                    }
+                };
+            }
+        };
+
+        $object2 = new class () {
+            public int $param1 = 99;
+            public object $paramObject;
+
+            public function __construct() {
+                $this->paramObject = new class() {
+                    public function getName(): string {
+                        return 'hello';
+                    }
+                };
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+            ParityChecker::DATA_MAPPER_KEY => [
+                'myMapper' => [
+                    'types' => '$paramObject',
+                    'closure' => fn (object $object): string => $object->getName(),
+                ]
+            ],
+        ]);
+
+        $this->assertCount(0, $errors);
+        $this->assertFalse($errors->hasErrors());
+    }
+
+    /** @test */
+    public function parityCheckerWithDataMapperFails(): void
+    {
+        $object1 = new class () {
+            public int $param1 = 99;
+            public object $paramObject;
+
+            public function __construct() {
+                $this->paramObject = new class() {
+                    public function getName(): string {
+                        return 'mock';
+                    }
+                };
+            }
+        };
+
+        $object2 = new class () {
+            public int $param1 = 99;
+            public object $paramObject;
+
+            public function __construct() {
+                $this->paramObject = new class() {
+                    public function getName(): string {
+                        return 'hello';
+                    }
+                };
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+            ParityChecker::DATA_MAPPER_KEY => [
+                'myMapper' => [
+                    'types' => '$paramObject',
+                    'closure' => fn (object $object): string => $object->getName(),
+                ]
+            ],
+        ]);
+
+        $this->assertCount(1, $errors);
+        /** @var ParityError $error */
+        foreach ($errors as $error) {
+            $this->assertSame('paramObject', $error->getProperty());
+            $this->assertSame('mock', $error->getObject1Value()->getName());
+            $this->assertSame('hello', $error->getObject2Value()->getName());
+        }
+    }
+
     public function noCheckOnTypesProvider(): array
     {
         return [
