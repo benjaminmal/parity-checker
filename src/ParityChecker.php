@@ -90,9 +90,7 @@ class ParityChecker
             return true;
         }
 
-        if (array_key_exists(self::DATETIME_CHECK_FORMAT_KEY, $options)
-            && false !== $options[self::DATETIME_CHECK_FORMAT_KEY]
-        ) {
+        if (false !== $options[self::DATETIME_CHECK_FORMAT_KEY]) {
             $options[self::DATA_MAPPER_KEY]['elodgy_internal_datetime_mapper'] = [
                 'types' => [\DateTime::class, \DateTimeImmutable::class],
                 'closure' => static function ($dateTime) use ($options) {
@@ -167,6 +165,7 @@ class ParityChecker
 
         $resolver
             ->define(self::DATETIME_CHECK_FORMAT_KEY)
+            ->default(false)
             ->allowedTypes('string', 'bool');
 
         $resolver
