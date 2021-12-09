@@ -20,8 +20,8 @@ parameters:
       path: src/ParityChecker.php
 
     -
-      message: "#^Cannot access offset ('closure'|mixed|'types') on mixed\\.$#"
-      count: 5
+      message: "#^Cannot access offset ('closure'|mixed|'types'|'elodgy_internal…') on mixed\\.$#"
+      count: 6
       path: src/ParityChecker.php
 
     -

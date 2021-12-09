@@ -90,6 +90,24 @@ class ParityChecker
             return true;
         }
 
+        if (array_key_exists(self::DATETIME_CHECK_FORMAT_KEY, $options)) {
+            $options[self::DATA_MAPPER_KEY]['elodgy_internal_datetime_mapper'] = [
+                'types' => [\DateTime::class, \DateTimeImmutable::class],
+                'closure' => static function ($dateTime) use ($options) {
+                    /** @var \DateTime|\DateTimeImmutable $dateTime */
+                    if ($dateTime instanceof \DateTime) {
+                        $dateTime = \DateTimeImmutable::createFromMutable($dateTime);
+                    }
+
+                    /** @var string $format */
+                    $format = $options[self::DATETIME_CHECK_FORMAT_KEY];
+                    $dateTime = $dateTime->setTimezone(new \DateTimeZone('UTC'));
+
+                    return $dateTime->format($format);
+                },
+            ];
+        }
+
         if (array_key_exists(self::DATA_MAPPER_KEY, $options)) {
             foreach ($options[self::DATA_MAPPER_KEY] as $mapper) {
                 if ($this->isTypeOrProperty($mapper[self::DATA_MAPPER_TYPES_KEY], $value1, $value2, $property)) {
@@ -162,22 +180,7 @@ class ParityChecker
                     ->define(self::DATA_MAPPER_CLOSURE_KEY)
                     ->required()
                     ->allowedTypes(\Closure::class);
-            })
-            ->default(static fn (Options $options): array => [
-                'datetime_mapper' => [
-                    'types' => [\DateTime::class, \DateTimeImmutable::class],
-                    'closure' => static function ($dateTime) use ($options) {
-                        /** @var \DateTime|\DateTimeImmutable $dateTime */
-                        if ($dateTime instanceof \DateTime) {
-                            $dateTime = \DateTimeImmutable::createFromMutable($dateTime);
-                        }
-
-                        $dateTime = $dateTime->setTimezone(new \DateTimeZone('UTC'));
-
-                        return $dateTime->format($options[self::DATETIME_CHECK_FORMAT_KEY]);
-                    },
-                ],
-            ]);
+            });
 
         $resolver
             ->define(self::CALLBACK_CHECKER_KEY)
