@@ -22,6 +22,8 @@ class ParityChecker
     public const CALLBACK_TYPES_KEY = 'types';
     public const CALLBACK_CLOSURE_KEY = 'closure';
 
+    private const TYPES_ALLOWED_TYPES = ['string[]', 'string'];
+
     protected PropertyAccessorInterface $propertyAccessor;
     protected PropertyInfoExtractorInterface $propertyInfoExtractor;
 
@@ -106,17 +108,17 @@ class ParityChecker
         $resolver
             ->define(self::IGNORE_TYPES_KEY)
             ->default(['object'])
-            ->allowedTypes('string[]', 'string')
+            ->allowedTypes(...self::TYPES_ALLOWED_TYPES)
             ->allowedValues($typeClosure);
 
         $resolver
             ->define(self::ONLY_TYPES_KEY)
-            ->allowedTypes('string[]', 'string')
+            ->allowedTypes(...self::TYPES_ALLOWED_TYPES)
             ->allowedValues($typeClosure);
 
         $resolver
             ->define(self::LOOSE_CHECK_TYPES_KEY)
-            ->allowedTypes('string[]', 'string')
+            ->allowedTypes(...self::TYPES_ALLOWED_TYPES)
             ->allowedValues($typeClosure);
 
         $resolver
@@ -131,7 +133,7 @@ class ParityChecker
                 $resolver
                     ->define(self::CALLBACK_TYPES_KEY)
                     ->required()
-                    ->allowedTypes('string[]', 'string')
+                    ->allowedTypes(...self::TYPES_ALLOWED_TYPES)
                     ->allowedValues($typeClosure);
 
                 $resolver
