@@ -167,7 +167,6 @@ class ParityChecker
 
         $resolver
             ->define(self::DATETIME_CHECK_FORMAT_KEY)
-            ->default('Y-m-d H:i:s')
             ->allowedTypes('string', 'bool');
 
         $resolver
