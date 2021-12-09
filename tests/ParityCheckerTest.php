@@ -8,6 +8,7 @@ use Elodgy\ParityChecker\ParityChecker;
 use Elodgy\ParityChecker\ParityError;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
+use Webmozart\Assert\InvalidArgumentException;
 
 class ParityCheckerTest extends TestCase
 {
@@ -198,6 +199,49 @@ class ParityCheckerTest extends TestCase
 
         $this->assertCount(3, $errors);
     }
+
+    /** @test */
+    public function checkParityWithCustomCheckerAndMissingType(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The callback closure must return only a boolean.');
+
+        $object = new class() {
+            public int $param1;
+        };
+
+        $parityChecker = ParityChecker::create();
+        $parityChecker->checkParity([$object, clone $object], [
+            ParityChecker::CALLBACK_CHECKER_KEY => [
+                'checker1' => [
+                    ParityChecker::CALLBACK_TYPES_KEY => ['$param1', '$param2', '$param3'],
+                    ParityChecker::CALLBACK_CLOSURE_KEY => fn ($value1, $value2, string $property, array $options) => false,
+                ]
+            ]
+        ]);
+    }
+
+//    Only do this check when moving to PHP >= 8
+//    /** @test */
+//    public function checkParityWithCustomCheckerAndInvalidType(): void
+//    {
+//        $this->expectException(InvalidArgumentException::class);
+//        $this->expectExceptionMessage('The callback closure must return only a boolean.');
+//
+//        $object = new class() {
+//            public int $param1;
+//        };
+//
+//        $parityChecker = ParityChecker::create();
+//        $parityChecker->checkParity([$object, clone $object], [
+//            ParityChecker::CALLBACK_CHECKER_KEY => [
+//                'checker1' => [
+//                    ParityChecker::CALLBACK_TYPES_KEY => ['$param1', '$param2', '$param3'],
+//                    ParityChecker::CALLBACK_CLOSURE_KEY => fn ($value1, $value2, string $property, array $options): bool|array => false,
+//                ]
+//            ]
+//        ]);
+//    }
 
     /** @test */
     public function checkParityWithDeepObjectLimitAt2(): void

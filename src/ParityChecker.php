@@ -11,6 +11,7 @@ use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
+use Webmozart\Assert\Assert;
 
 class ParityChecker
 {
@@ -21,6 +22,8 @@ class ParityChecker
     public const CALLBACK_CHECKER_KEY = 'callback_checker';
     public const CALLBACK_TYPES_KEY = 'types';
     public const CALLBACK_CLOSURE_KEY = 'closure';
+
+    private const TYPES_ALLOWED_TYPES = ['string[]', 'string'];
 
     protected PropertyAccessorInterface $propertyAccessor;
     protected PropertyInfoExtractorInterface $propertyInfoExtractor;
@@ -106,17 +109,17 @@ class ParityChecker
         $resolver
             ->define(self::IGNORE_TYPES_KEY)
             ->default(['object'])
-            ->allowedTypes('string[]', 'string')
+            ->allowedTypes(...self::TYPES_ALLOWED_TYPES)
             ->allowedValues($typeClosure);
 
         $resolver
             ->define(self::ONLY_TYPES_KEY)
-            ->allowedTypes('string[]', 'string')
+            ->allowedTypes(...self::TYPES_ALLOWED_TYPES)
             ->allowedValues($typeClosure);
 
         $resolver
             ->define(self::LOOSE_CHECK_TYPES_KEY)
-            ->allowedTypes('string[]', 'string')
+            ->allowedTypes(...self::TYPES_ALLOWED_TYPES)
             ->allowedValues($typeClosure);
 
         $resolver
@@ -131,13 +134,25 @@ class ParityChecker
                 $resolver
                     ->define(self::CALLBACK_TYPES_KEY)
                     ->required()
-                    ->allowedTypes('string[]', 'string')
+                    ->allowedTypes(...self::TYPES_ALLOWED_TYPES)
                     ->allowedValues($typeClosure);
 
                 $resolver
                     ->define(self::CALLBACK_CLOSURE_KEY)
                     ->required()
-                    ->allowedTypes(\Closure::class);
+                    ->allowedTypes(\Closure::class)
+                    ->allowedValues(static function (\Closure $closure): bool {
+                        /** @var \ReflectionNamedType|\ReflectionUnionType|null $returnType */
+                        $returnType = (new \ReflectionFunction($closure))->getReturnType();
+
+                        Assert::isInstanceOf(
+                            $returnType,
+                            \ReflectionNamedType::class,
+                            'The callback closure must return only a boolean.'
+                        );
+
+                        return 'bool' === $returnType->getName();
+                    });
             });
     }
 
