@@ -552,6 +552,238 @@ class ParityCheckerTest extends TestCase
         $this->assertFalse($errors->hasErrors());
     }
 
+    /** @test */
+    public function parityCheckerWithDataMapper(): void
+    {
+        $object1 = new class () {
+            public int $param1 = 99;
+            public object $paramObject;
+
+            public function __construct() {
+                $this->paramObject = new class() {
+                    public function getName(): string {
+                        return 'hello';
+                    }
+                };
+            }
+        };
+
+        $object2 = new class () {
+            public int $param1 = 99;
+            public object $paramObject;
+
+            public function __construct() {
+                $this->paramObject = new class() {
+                    public function getName(): string {
+                        return 'hello';
+                    }
+                };
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+            ParityChecker::DATA_MAPPER_KEY => [
+                'myMapper' => [
+                    'types' => '$paramObject',
+                    'closure' => fn (object $object): string => $object->getName(),
+                ]
+            ],
+        ]);
+
+        $this->assertCount(0, $errors);
+        $this->assertFalse($errors->hasErrors());
+    }
+
+    /** @test */
+    public function parityCheckerWithDataMapperFails(): void
+    {
+        $object1 = new class () {
+            public int $param1 = 99;
+            public object $paramObject;
+
+            public function __construct() {
+                $this->paramObject = new class() {
+                    public function getName(): string {
+                        return 'mock';
+                    }
+                };
+            }
+        };
+
+        $object2 = new class () {
+            public int $param1 = 99;
+            public object $paramObject;
+
+            public function __construct() {
+                $this->paramObject = new class() {
+                    public function getName(): string {
+                        return 'hello';
+                    }
+                };
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+            ParityChecker::DATA_MAPPER_KEY => [
+                'myMapper' => [
+                    'types' => '$paramObject',
+                    'closure' => fn (object $object): string => $object->getName(),
+                ]
+            ],
+        ]);
+
+        $this->assertCount(1, $errors);
+        /** @var ParityError $error */
+        foreach ($errors as $error) {
+            $this->assertSame('paramObject', $error->getProperty());
+            $this->assertSame('mock', $error->getObject1Value()->getName());
+            $this->assertSame('hello', $error->getObject2Value()->getName());
+        }
+    }
+
+    /** @test */
+    public function parityCheckerWithDateTimeDataMapperWithErrors(): void
+    {
+        $object1 = new class () {
+            public \DateTime $dateTime;
+            public \DateTimeImmutable $dateTimeImmutable;
+
+            public function __construct() {
+                $this->dateTime = new \DateTime('2021-06-21 12:00:00');
+                $this->dateTimeImmutable = new \DateTimeImmutable('2021-06-21 12:00:00');
+            }
+        };
+
+        $object2 = new class () {
+            public \DateTime $dateTime;
+            public \DateTimeImmutable $dateTimeImmutable;
+
+            public function __construct() {
+                $this->dateTime = new \DateTime('2021-06-21 10:00:00');
+                $this->dateTimeImmutable = new \DateTimeImmutable('2021-06-21 10:00:00');
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+        ]);
+
+        $this->assertCount(2, $errors);
+
+        /** @var ParityError $error */
+        foreach ($errors as $error) {
+            if ($error->getProperty() === 'dateTime') {
+                $this->assertInstanceOf(\DateTime::class, $error->getObject1Value());
+                $this->assertInstanceOf(\DateTime::class, $error->getObject2Value());
+
+                // Check if datetime has changed
+                $this->assertEquals(12, $error->getObject1Value()->format('H'));
+                $this->assertEquals(10, $error->getObject2Value()->format('H'));
+            } else {
+                $this->assertInstanceOf(\DateTimeImmutable::class, $error->getObject1Value());
+                $this->assertInstanceOf(\DateTimeImmutable::class, $error->getObject2Value());
+            }
+        }
+    }
+
+    /** @test */
+    public function parityCheckerWithDateTimeDataMapper(): void
+    {
+        $dateTime = new \DateTime();
+        $dateTimeImmutable = new \DateTimeImmutable();
+
+        $object1 = new class ($dateTime, $dateTimeImmutable) {
+            public \DateTime $dateTime;
+            public \DateTimeImmutable $dateTimeImmutable;
+
+            public function __construct(\DateTime $dateTime, \DateTimeImmutable $dateTimeImmutable) {
+                $this->dateTime = $dateTime;
+                $this->dateTimeImmutable = $dateTimeImmutable;
+            }
+        };
+
+        $object2 = new class ($dateTime, $dateTimeImmutable) {
+            public \DateTime $dateTime;
+            public \DateTimeImmutable $dateTimeImmutable;
+
+            public function __construct(\DateTime $dateTime, \DateTimeImmutable $dateTimeImmutable) {
+                $this->dateTime = $dateTime;
+                $this->dateTimeImmutable = $dateTimeImmutable;
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+            ParityChecker::DATETIME_CHECK_FORMAT_KEY => true,
+        ]);
+
+        $this->assertCount(0, $errors);
+    }
+
+    /** @test */
+    public function parityCheckerWithDateTimeDataMapperWithFormat(): void
+    {
+        $object1 = new class () {
+            public \DateTimeImmutable $dateTimeImmutable;
+
+            public function __construct() {
+                $this->dateTimeImmutable = new \DateTimeImmutable('2021-02-01 05:00:00');
+            }
+        };
+
+        $object2 = new class () {
+            public \DateTimeImmutable $dateTimeImmutable;
+
+            public function __construct() {
+                $this->dateTimeImmutable = new \DateTimeImmutable('2021-02-01 05:00:01');
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+            ParityChecker::DATETIME_CHECK_FORMAT_KEY => 'Y-m-d',
+        ]);
+
+        $this->assertCount(0, $errors);
+    }
+
+    /** @test */
+    public function parityCheckerWithDateTimeDataMapperWithDifferentTimezone(): void
+    {
+        $dateTimeImmutable = new \DateTimeImmutable();
+
+        $object1 = new class ($dateTimeImmutable) {
+            public \DateTimeImmutable $dateTimeImmutable;
+
+            public function __construct(\DateTimeImmutable $dateTimeImmutable) {
+                $this->dateTimeImmutable = $dateTimeImmutable->setTimezone(new \DateTimeZone('Europe/Paris'));
+            }
+        };
+
+        $object2 = new class ($dateTimeImmutable) {
+            public \DateTimeImmutable $dateTimeImmutable;
+
+            public function __construct(\DateTimeImmutable $dateTimeImmutable) {
+                $this->dateTimeImmutable = $dateTimeImmutable->setTimezone(new \DateTimeZone('Australia/Melbourne'));
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+            ParityChecker::DATETIME_CHECK_FORMAT_KEY => true,
+        ]);
+
+        $this->assertCount(0, $errors);
+    }
+
     public function noCheckOnTypesProvider(): array
     {
         return [
