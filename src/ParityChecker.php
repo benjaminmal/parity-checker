@@ -25,6 +25,7 @@ class ParityChecker
     public const DATA_MAPPER_CLOSURE_KEY = 'closure';
     public const DATETIME_CHECK_FORMAT_KEY = 'datetime_check_format';
     public const DATE_INTERVAL_FORMAT_KEY = 'date_interval_format';
+    public const DATE_TIME_ZONE_KEY = 'datetime_zone';
 
     private const TYPES_ALLOWED_TYPES = ['string[]', 'string'];
 
@@ -154,6 +155,11 @@ class ParityChecker
             ->define(self::DATE_INTERVAL_FORMAT_KEY)
             ->default('%R %Y %M %D %H %I %S %F')
             ->allowedTypes('string');
+
+        $resolver
+            ->define(self::DATE_TIME_ZONE_KEY)
+            ->default(true)
+            ->allowedTypes('bool');
 
         $resolver
             ->define(self::DATA_MAPPER_KEY)
