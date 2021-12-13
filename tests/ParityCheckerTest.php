@@ -805,6 +805,134 @@ class ParityCheckerTest extends TestCase
         $this->assertCount(0, $errors);
     }
 
+    /** @test */
+    public function parityCheckerWithDateTimeZoneMapper(): void
+    {
+        $object1 = new class () {
+            public \DateTimeZone $timeZone;
+            public function __construct() {
+                $this->timeZone = new \DateTimeZone('Europe/Paris');
+            }
+        };
+
+        $object2 = new class () {
+            public \DateTimeZone $timeZone;
+            public function __construct() {
+                $this->timeZone = new \DateTimeZone('Europe/Paris');
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+        ]);
+
+        $this->assertCount(0, $errors);
+    }
+
+    /** @test */
+    public function parityCheckerWithDateTimeZoneMapperFails(): void
+    {
+        $object1 = new class () {
+            public \DateTimeZone $timeZone;
+            public function __construct() {
+                $this->timeZone = new \DateTimeZone('Europe/Paris');
+            }
+        };
+
+        $object2 = new class () {
+            public \DateTimeZone $timeZone;
+            public function __construct() {
+                $this->timeZone = new \DateTimeZone('Australia/Melbourne');
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+        ]);
+
+        $this->assertCount(1, $errors);
+        $this->assertSame('Europe/Paris', $errors[0]->getObject1Value()->getName());
+        $this->assertSame('Australia/Melbourne', $errors[0]->getObject2Value()->getName());
+    }
+
+    /** @test */
+    public function parityCheckerWithDateIntervalMapper(): void
+    {
+        $object1 = new class () {
+            public \DateInterval $interval;
+            public function __construct() {
+                $this->interval = new \DateInterval('P1D');
+            }
+        };
+
+        $object2 = new class () {
+            public \DateInterval $interval;
+            public function __construct() {
+                $this->interval = new \DateInterval('P1D');
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+        ]);
+
+        $this->assertCount(0, $errors);
+    }
+
+    /** @test */
+    public function parityCheckerWithDateIntervalMapperFails(): void
+    {
+        $object1 = new class () {
+            public \DateInterval $interval;
+            public function __construct() {
+                $this->interval = new \DateInterval('P1D');
+            }
+        };
+
+        $object2 = new class () {
+            public \DateInterval $interval;
+            public function __construct() {
+                $this->interval = new \DateInterval('P2D');
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+        ]);
+
+        $this->assertCount(1, $errors);
+    }
+
+    /** @test */
+    public function parityCheckerWithDateIntervalMapperWithCustomFormat(): void
+    {
+        $object1 = new class () {
+            public \DateInterval $interval;
+            public function __construct() {
+                $this->interval = new \DateInterval('P1D');
+            }
+        };
+
+        $object2 = new class () {
+            public \DateInterval $interval;
+            public function __construct() {
+                $this->interval = new \DateInterval('P2D');
+            }
+        };
+
+        $parityChecker = ParityChecker::create();
+        $errors = $parityChecker->checkParity([$object1, $object2], [
+            ParityChecker::IGNORE_TYPES_KEY => [],
+            ParityChecker::DATE_INTERVAL_FORMAT_KEY => '%S',
+        ]);
+
+        $this->assertCount(0, $errors);
+    }
+
     public function noCheckOnTypesProvider(): array
     {
         return [
