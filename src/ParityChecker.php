@@ -148,12 +148,12 @@ class ParityChecker
 
         $resolver
             ->define(self::DATETIME_CHECK_FORMAT_KEY)
-            ->default(false)
+            ->default(true)
             ->allowedTypes('string', 'bool');
 
         $resolver
             ->define(self::DATE_INTERVAL_FORMAT_KEY)
-            ->default('%R %Y %M %D %H %I %S %F')
+            ->default(true)
             ->allowedTypes('string', 'bool');
 
         $resolver
