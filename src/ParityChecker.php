@@ -28,6 +28,8 @@ class ParityChecker
     public const DATE_TIME_ZONE_KEY = 'datetime_zone';
 
     private const TYPES_ALLOWED_TYPES = ['string[]', 'string'];
+    private const DEFAULT_DATE_TIME_FORMAT = 'Y-m-d H:i:s';
+    private const DEFAULT_DATE_INTERVAL_FORMAT = '%R %Y %M %D %H %I %S %F';
 
     protected PropertyAccessorInterface $propertyAccessor;
     protected PropertyInfoExtractorInterface $propertyInfoExtractor;
