@@ -16,20 +16,20 @@ parameters:
 
     -
       message: "#^Parameter \\#1 \\$type of method Elodgy\\\\ParityChecker\\\\ParityChecker\\:\\:isTypeOrProperty\\(\\) expects array\\<string\\>\\|string, mixed given\\.$#"
-      count: 5
-      path: src/ParityChecker.php
-
-    -
-      message: "#^Cannot access offset ('closure'|mixed|'types'|'elodgy_internal…') on mixed\\.$#"
-      count: 6
+      count: 3
       path: src/ParityChecker.php
 
     -
       message: "#^Trying to invoke (string\\|true|mixed) (but )?it('s)? (might )?not (be )?a callable\\.$#"
-      count: 5
+      count: 2
       path: src/ParityChecker.php
 
     -
       message: "#^Parameter \\#2 \\$haystack of function in_array expects array, mixed given\\.$#"
+      count: 1
+      path: src/ParityChecker.php
+
+    -
+      message: "#^Call to an undefined method ReflectionType\\:\\:getName\\(\\)\\.$#"
       count: 1
       path: src/ParityChecker.php
