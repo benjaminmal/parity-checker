@@ -244,6 +244,27 @@ class ParityCheckerTest extends TestCase
 //    }
 
     /** @test */
+    public function checkParityWithCustomCheckerAndWrongType(): void
+    {
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "callback_checker" with value array is invalid.');
+
+        $object = new class() {
+            public int $param1 = 0;
+        };
+
+        $parityChecker = ParityChecker::create();
+        $parityChecker->checkParity([$object, clone $object], [
+            ParityChecker::CALLBACK_CHECKER_KEY => [
+                'myChecker' => new ParityCheckerCallback(
+                    ['mock_parameter', '$param2', '$param3'],
+                    fn ($value1, $value2, string $property, array $options): bool => false,
+                ),
+            ]
+        ]);
+    }
+
+    /** @test */
     public function checkParityWithDeepObjectLimitAt2(): void
     {
         $deepObject1 = new class () {

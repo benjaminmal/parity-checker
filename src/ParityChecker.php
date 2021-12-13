@@ -121,6 +121,8 @@ class ParityChecker
     protected function configureOption(OptionsResolver $resolver): void
     {
         $typeClosure = \Closure::fromCallable([$this, 'optionsTypeValidation']);
+        $typeCallbackClosure = \Closure::fromCallable([$this, 'optionTypeCallbackValidation']);
+        $boolClosureReturnTypeClosure = \Closure::fromCallable([$this, 'optionsClosureReturnTypeValidation']);
 
         $resolver
             ->define(self::IGNORE_TYPES_KEY)
@@ -153,16 +155,7 @@ class ParityChecker
         $resolver
             ->define(self::DATA_MAPPER_KEY)
             ->allowedTypes(ParityCheckerCallbackInterface::class.'[]')
-            ->allowedValues(function (array $mappers): bool {
-                /** @var ParityCheckerCallbackInterface $mapper */
-                foreach ($mappers as $mapper) {
-                    if (! $this->optionsTypeValidation($mapper->getTypes())) {
-                        return false;
-                    }
-                }
-
-                return true;
-            })
+            ->allowedValues($typeCallbackClosure)
             ->default(static fn (Options $options): array => [
                 'internal_datetime_mapper' => new ParityCheckerCallback(
                     [\DateTime::class, \DateTimeImmutable::class],
@@ -184,19 +177,9 @@ class ParityChecker
         $resolver
             ->define(self::CALLBACK_CHECKER_KEY)
             ->allowedTypes(ParityCheckerCallbackInterface::class.'[]')
-            ->allowedValues(function (array $checkers): bool {
-                /** @var ParityCheckerCallbackInterface $checker */
-                foreach ($checkers as $checker) {
-                    if (! $this->optionsTypeValidation($checker->getTypes())
-                        || null === ($returnType = (new \ReflectionFunction($checker->getClosure()))->getReturnType())
-                        || 'bool' !== $returnType->getName()
-                    ) {
-                        return false;
-                    }
-                }
-
-                return true;
-            })
+            ->allowedValues(fn (iterable $checkers): bool
+                => $typeCallbackClosure($checkers) && $boolClosureReturnTypeClosure($checkers)
+            )
         ;
     }
 
@@ -420,8 +403,43 @@ class ParityChecker
         return $this->doOptionsTypeValidation($values);
     }
 
+    /**
+     * @param iterable<ParityCheckerCallbackInterface> $values
+     */
+    private function optionTypeCallbackValidation(iterable $values): bool
+    {
+        foreach ($values as $value) {
+            if (! $this->optionsTypeValidation($value->getTypes())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private function doOptionsTypeValidation(string $value): bool
     {
         return $this->isProperty($value) || $this->isType($value) || $this->isClassOrInterface($value);
+    }
+
+    /**
+     * @param iterable<ParityCheckerCallbackInterface> $callbacks
+     */
+    private function optionsClosureReturnTypeValidation(iterable $callbacks): bool
+    {
+        foreach ($callbacks as $callback) {
+            if (! $this->doOptionsClosureReturnTypeValidation($callback)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function doOptionsClosureReturnTypeValidation(ParityCheckerCallbackInterface $callback): bool
+    {
+        $returnType = (new \ReflectionFunction($callback->getClosure()))->getReturnType();
+
+        return null !== $returnType && 'bool' === $returnType->getName();
     }
 }
