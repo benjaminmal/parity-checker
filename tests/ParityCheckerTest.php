@@ -207,7 +207,7 @@ class ParityCheckerTest extends TestCase
         $this->expectExceptionMessage('The option "callback_checker" with value array is invalid.');
 
         $object = new class() {
-            public int $param1;
+            public int $param1 = 0;
         };
 
         $parityChecker = ParityChecker::create();
