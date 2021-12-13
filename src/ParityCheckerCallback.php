@@ -13,6 +13,9 @@ class ParityCheckerCallback implements ParityCheckerCallbackInterface
 
     protected \Closure $closure;
 
+    /**
+     * @param string[]|string $types
+     */
     public function __construct($types, \Closure $closure)
     {
         $this->types = is_string($types) ? [$types] : $types;

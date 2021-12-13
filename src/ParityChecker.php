@@ -12,7 +12,6 @@ use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
-use Webmozart\Assert\Assert;
 
 class ParityChecker
 {
@@ -154,7 +153,7 @@ class ParityChecker
 
         $resolver
             ->define(self::DATA_MAPPER_KEY)
-            ->allowedTypes(ParityCheckerCallbackInterface::class.'[]')
+            ->allowedTypes(ParityCheckerCallbackInterface::class . '[]')
             ->allowedValues($typeCallbackClosure)
             ->default(static fn (Options $options): array => [
                 'internal_datetime_mapper' => new ParityCheckerCallback(
@@ -176,8 +175,9 @@ class ParityChecker
 
         $resolver
             ->define(self::CALLBACK_CHECKER_KEY)
-            ->allowedTypes(ParityCheckerCallbackInterface::class.'[]')
-            ->allowedValues(fn (iterable $checkers): bool
+            ->allowedTypes(ParityCheckerCallbackInterface::class . '[]')
+            ->allowedValues(
+                static fn (iterable $checkers): bool
                 => $typeCallbackClosure($checkers) && $boolClosureReturnTypeClosure($checkers)
             )
         ;
