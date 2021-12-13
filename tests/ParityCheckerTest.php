@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Elodgy\ParityChecker\Tests;
 
 use Elodgy\ParityChecker\ParityChecker;
+use Elodgy\ParityChecker\ParityCheckerCallback;
 use Elodgy\ParityChecker\ParityError;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
-use Webmozart\Assert\InvalidArgumentException;
 
 class ParityCheckerTest extends TestCase
 {
@@ -190,10 +190,10 @@ class ParityCheckerTest extends TestCase
         $parityChecker = ParityChecker::create();
         $errors = $parityChecker->checkParity([$object1, $object2], [
             ParityChecker::CALLBACK_CHECKER_KEY => [
-                'checker1' => [
-                    ParityChecker::CALLBACK_TYPES_KEY => ['$param1', '$param2', '$param3'],
-                    ParityChecker::CALLBACK_CLOSURE_KEY => fn ($value1, $value2, string $property, array $options): bool => false,
-                ]
+                'myChecker' => new ParityCheckerCallback(
+                    ['$param1', '$param2', '$param3'],
+                    fn ($value1, $value2, string $property, array $options): bool => false
+                ),
             ]
         ]);
 
@@ -203,8 +203,8 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function checkParityWithCustomCheckerAndMissingType(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The callback closure must return only a boolean.');
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "callback_checker" with value array is invalid.');
 
         $object = new class() {
             public int $param1;
@@ -213,10 +213,10 @@ class ParityCheckerTest extends TestCase
         $parityChecker = ParityChecker::create();
         $parityChecker->checkParity([$object, clone $object], [
             ParityChecker::CALLBACK_CHECKER_KEY => [
-                'checker1' => [
-                    ParityChecker::CALLBACK_TYPES_KEY => ['$param1', '$param2', '$param3'],
-                    ParityChecker::CALLBACK_CLOSURE_KEY => fn ($value1, $value2, string $property, array $options) => false,
-                ]
+                'myChecker' => new ParityCheckerCallback(
+                    ['$param1', '$param2', '$param3'],
+                    fn ($value1, $value2, string $property, array $options) => false,
+                ),
             ]
         ]);
     }
@@ -235,10 +235,10 @@ class ParityCheckerTest extends TestCase
 //        $parityChecker = ParityChecker::create();
 //        $parityChecker->checkParity([$object, clone $object], [
 //            ParityChecker::CALLBACK_CHECKER_KEY => [
-//                'checker1' => [
-//                    ParityChecker::CALLBACK_TYPES_KEY => ['$param1', '$param2', '$param3'],
-//                    ParityChecker::CALLBACK_CLOSURE_KEY => fn ($value1, $value2, string $property, array $options): bool|array => false,
-//                ]
+//                'myChecker' => new ParityCheckerCallback(
+//                    ['$param1', '$param2', '$param3'],
+//                    fn ($value1, $value2, string $property, array $options): bool|array => false
+//                ),
 //            ]
 //        ]);
 //    }
@@ -585,10 +585,10 @@ class ParityCheckerTest extends TestCase
         $errors = $parityChecker->checkParity([$object1, $object2], [
             ParityChecker::IGNORE_TYPES_KEY => [],
             ParityChecker::DATA_MAPPER_KEY => [
-                'myMapper' => [
-                    'types' => '$paramObject',
-                    'closure' => fn (object $object): string => $object->getName(),
-                ]
+                'myMapper' => new ParityCheckerCallback(
+                    '$paramObject',
+                    fn (object $object): string => $object->getName(),
+                ),
             ],
         ]);
 
@@ -629,10 +629,10 @@ class ParityCheckerTest extends TestCase
         $errors = $parityChecker->checkParity([$object1, $object2], [
             ParityChecker::IGNORE_TYPES_KEY => [],
             ParityChecker::DATA_MAPPER_KEY => [
-                'myMapper' => [
-                    'types' => '$paramObject',
-                    'closure' => fn (object $object): string => $object->getName(),
-                ]
+                'myMapper' => new ParityCheckerCallback(
+                    '$paramObject',
+                    fn (object $object): string => $object->getName(),
+                ),
             ],
         ]);
 

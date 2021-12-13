@@ -21,10 +21,8 @@ class ParityChecker
     public const LOOSE_CHECK_TYPES_KEY = 'loose_types';
     public const DEEP_OBJECT_LIMIT_KEY = 'deep_object_limit';
     public const CALLBACK_CHECKER_KEY = 'callback_checker';
-    public const CALLBACK_TYPES_KEY = 'types';
     public const CALLBACK_CLOSURE_KEY = 'closure';
     public const DATA_MAPPER_KEY = 'data_mapper';
-    public const DATA_MAPPER_TYPES_KEY = 'types';
     public const DATA_MAPPER_CLOSURE_KEY = 'closure';
     public const DATETIME_CHECK_FORMAT_KEY = 'datetime_check_format';
 
@@ -90,31 +88,12 @@ class ParityChecker
             return true;
         }
 
-        if (false !== $options[self::DATETIME_CHECK_FORMAT_KEY]) {
-            $options[self::DATA_MAPPER_KEY]['elodgy_internal_datetime_mapper'] = [
-                'types' => [\DateTime::class, \DateTimeImmutable::class],
-                'closure' => static function ($dateTime) use ($options) {
-                    /** @var \DateTime|\DateTimeImmutable $dateTime */
-                    if ($dateTime instanceof \DateTime) {
-                        $dateTime = \DateTimeImmutable::createFromMutable($dateTime);
-                    }
-
-                    $dateTime = $dateTime->setTimezone(new \DateTimeZone('UTC'));
-
-                    return $dateTime->format(
-                        is_string($options[self::DATETIME_CHECK_FORMAT_KEY])
-                            ? $options[self::DATETIME_CHECK_FORMAT_KEY]
-                            : 'Y-m-d H:i:s'
-                    );
-                },
-            ];
-        }
-
         if (array_key_exists(self::DATA_MAPPER_KEY, $options)) {
+            /** @var ParityCheckerCallbackInterface $mapper */
             foreach ($options[self::DATA_MAPPER_KEY] as $mapper) {
-                if ($this->isTypeOrProperty($mapper[self::DATA_MAPPER_TYPES_KEY], $value1, $value2, $property)) {
-                    $value1 = $mapper[self::DATA_MAPPER_CLOSURE_KEY]($value1, $property, $options);
-                    $value2 = $mapper[self::DATA_MAPPER_CLOSURE_KEY]($value2, $property, $options);
+                if ($this->isTypeOrProperty($mapper->getTypes(), $value1, $value2, $property)) {
+                    $value1 = $mapper->getClosure()($value1, $property, $options);
+                    $value2 = $mapper->getClosure()($value2, $property, $options);
 
                     break;
                 }
@@ -128,9 +107,10 @@ class ParityChecker
         }
 
         if (array_key_exists(self::CALLBACK_CHECKER_KEY, $options)) {
+            /** @var ParityCheckerCallbackInterface $checker */
             foreach ($options[self::CALLBACK_CHECKER_KEY] as $checker) {
-                if ($this->isTypeOrProperty($checker[self::CALLBACK_TYPES_KEY], $value1, $value2, $property)) {
-                    return $checker[self::CALLBACK_CLOSURE_KEY]($value1, $value2, $property, $options);
+                if ($this->isTypeOrProperty($checker->getTypes(), $value1, $value2, $property)) {
+                    return $checker->getClosure()($value1, $value2, $property, $options);
                 }
             }
         }
@@ -169,48 +149,55 @@ class ParityChecker
             ->allowedTypes('string', 'bool');
 
         $resolver
-            ->define(self::DATA_MAPPER_KEY)
-            ->default(static function (OptionsResolver $mapperResolver) use ($typeClosure): void {
-                $mapperResolver->setPrototype(true);
-                $mapperResolver
-                    ->define(self::DATA_MAPPER_TYPES_KEY)
-                    ->required()
-                    ->allowedTypes(...self::TYPES_ALLOWED_TYPES)
-                    ->allowedValues($typeClosure);
 
-                $mapperResolver
-                    ->define(self::DATA_MAPPER_CLOSURE_KEY)
-                    ->required()
-                    ->allowedTypes(\Closure::class);
-            });
+        $resolver
+            ->define(self::DATA_MAPPER_KEY)
+            ->allowedTypes(ParityCheckerCallbackInterface::class.'[]')
+            ->allowedValues(function (array $mappers): bool {
+                /** @var ParityCheckerCallbackInterface $mapper */
+                foreach ($mappers as $mapper) {
+                    if (! $this->optionsTypeValidation($mapper->getTypes())) {
+                        return false;
+                    }
+                }
+
+                return true;
+            })
+            ->default(static fn (Options $options): array => [
+                'internal_datetime_mapper' => new ParityCheckerCallback(
+                    [\DateTime::class, \DateTimeImmutable::class],
+                    static function ($dateTime) use ($options): string {
+                        /** @var \DateTime|\DateTimeImmutable $dateTime */
+                        $dateTime = $dateTime instanceof \DateTime
+                            ? \DateTimeImmutable::createFromMutable($dateTime)
+                            : $dateTime
+                        ;
+
+                        $dateTime = $dateTime->setTimezone(new \DateTimeZone('UTC'));
+
+                        return $dateTime->format(
+                            is_string($options[self::DATETIME_CHECK_FORMAT_KEY])
+                                ? $options[self::DATETIME_CHECK_FORMAT_KEY]
+                                : 'Y-m-d H:i:s'
+                        );
 
         $resolver
             ->define(self::CALLBACK_CHECKER_KEY)
-            ->default(static function (OptionsResolver $resolver) use ($typeClosure): void {
-                $resolver->setPrototype(true);
-                $resolver
-                    ->define(self::CALLBACK_TYPES_KEY)
-                    ->required()
-                    ->allowedTypes(...self::TYPES_ALLOWED_TYPES)
-                    ->allowedValues($typeClosure);
+            ->allowedTypes(ParityCheckerCallbackInterface::class.'[]')
+            ->allowedValues(function (array $checkers): bool {
+                /** @var ParityCheckerCallbackInterface $checker */
+                foreach ($checkers as $checker) {
+                    if (! $this->optionsTypeValidation($checker->getTypes())
+                        || null === ($returnType = (new \ReflectionFunction($checker->getClosure()))->getReturnType())
+                        || 'bool' !== $returnType->getName()
+                    ) {
+                        return false;
+                    }
+                }
 
-                $resolver
-                    ->define(self::CALLBACK_CLOSURE_KEY)
-                    ->required()
-                    ->allowedTypes(\Closure::class)
-                    ->allowedValues(static function (\Closure $closure): bool {
-                        /** @var \ReflectionNamedType|\ReflectionUnionType|null $returnType */
-                        $returnType = (new \ReflectionFunction($closure))->getReturnType();
-
-                        Assert::isInstanceOf(
-                            $returnType,
-                            \ReflectionNamedType::class,
-                            'The callback closure must return only a boolean.'
-                        );
-
-                        return 'bool' === $returnType->getName();
-                    });
-            });
+                return true;
+            })
+        ;
     }
 
     /**
