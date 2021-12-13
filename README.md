@@ -18,8 +18,11 @@ Getting started
 $parityChecker = ParityChecker::create();
 ```
 
-### Or using your `PropertyAccessorInterface` and `PropertyInfoExtractorInterface` implementations
+### Or using your implementations using Symfony [PropertyAccess](https://symfony.com/doc/current/components/property_access.html) & [PropertyInfo](https://symfony.com/doc/current/components/property_info.html) components
 ```php
+/** @var PropertyAccessorInterface $propertyAccessor */
+/** @var PropertyInfoExtractorInterface $propertyInfoExtractor */
+
 $parityChecker = new ParityChecker($propertyAccessor, $propertyInfoExtractor);
 ```
 
@@ -48,30 +51,29 @@ $errors = $parityChecker->checkParity([$object1, $object2], [
     // Set the recursion limit for objects
     'deep_object_limit' => 0,
     
-    // Set date time format to check
-    'datetime_check_format' => 'Y-m-d',
+    // Set DateTime format to check
+    'datetime_check_format' => false,
+    
+    // Set DateInterval format to check
+    'date_interval_format' => '%R %Y %M %D %H %I %S %F',
+    
+    // Set DateTime zone mapping to name
+    'datetime_zone' => true,
     
     // Set a data mapper closure
     'data_mapper' => [
-        'my-mapper' => [ // Validation free
-            'types' => 'array',
-            'closure' => function (array $array, string $property, array $options): mixed {
-                return $array['something'];
-            },
-        ],
+        'my-mapper' => new ParityCheckerCallback(
+            'array',
+            fn ($value, string $property, array $options): mixed => $value['something'],
+        ),
     ],
     
     // Custom checkers. You can set you own checker which replace other.
     'custom_checkers' => [
-        'my-checker' => [ // Validation free
-            // Required. Types to perform the closure on
-            'types' => '$property',
-            
-            // Required. Closure with $values, $property, $options. Must return bool.
-            'closure' => function ($value1, $value2, string $property, array $options): bool {
-                return true; // Your condition
-            },
-        ]
+        'my-checker' => new ParityCheckerCallback(
+            ['$property'],
+            fn ($value1, $value2, string $property, array $options): bool => true,
+        ),
     ],
 ]);
 ```
@@ -81,9 +83,11 @@ $errors = $parityChecker->checkParity([$object1, $object2], [
 |`only_types`|Perform checks only on these types. `ignore_types` is evaluated before, so if you set the same type in both `ignore_types` and `only_types`, the type will be ignored.|`string[]\|string`. Can be any types. Checked by the `is_` functions, classes/interfaces names or object properties (must be prefixed by `$`)| none|
 |`loose_types`| On which type to perform loose check (`==`) instead of (`===`)|`string[]\|string`. Can be any types. Checked by the `is_` functions, classes/interfaces names or object properties (must be prefixed by `$`)|none|
 |`deep_object_limit`|The object recursion limit|`int`|`0`|
-| `data_mapper`|Replace value before checking by your closure|['my-mapper' => ['types => [], 'closure' => fn (): mixed]]|A dateTime mapper on `DateTimeImmutable` & `DateTime` as string with format set in `datetime_check_format`|
-|`datetime_check_format`|The format that DateTime must be check with|`bool\|string`. Has to be a [valid datetime format](https://www.php.net/manual/en/datetime.format.php). If it's `true`, `Y-m-d H:i:s` is used.|`false`|
-| `custom_checkers`| You can set you own checker which replace other|['my-own-checker' => ['types' => [], 'closure' => fn (): bool => true]|none|
+| `data_mapper`|Replace value before checking by your closure|`ParityCheckCallbackInterface[]`|`datetime_check_format`, `date_interval_format`, `datetime_zone` mappers|
+|`datetime_check_format`|The format that `DateTime` must be check with|`bool\|string`. Has to be a [valid DateTime format](https://www.php.net/manual/en/datetime.format.php). If it's `true`, `Y-m-d H:i:s` is used.|`true`|
+|`date_interval_format`|The format that `DateInterval` must be check with|`bool\|string`. Has to be a [valid DateInterval format](https://www.php.net/manual/en/dateinterval.format.php). If it's true, `%R %Y %M %D %H %I %S %F` is used.|`true`|
+|`datetime_zone`|Map `DateTimeZone` objects to its timezone name in order to check it. E.g `Europe/Paris`|`bool`|`true`|
+| `custom_checkers`| You can set you own checker which replace other|`ParityCheckCallbackInterface[]`|none|
 
 ### Errors
 ```php

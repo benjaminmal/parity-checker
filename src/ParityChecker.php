@@ -25,8 +25,11 @@ class ParityChecker
     public const DATA_MAPPER_CLOSURE_KEY = 'closure';
     public const DATETIME_CHECK_FORMAT_KEY = 'datetime_check_format';
     public const DATE_INTERVAL_FORMAT_KEY = 'date_interval_format';
+    public const DATE_TIME_ZONE_KEY = 'datetime_zone';
 
     private const TYPES_ALLOWED_TYPES = ['string[]', 'string'];
+    private const DEFAULT_DATE_TIME_FORMAT = 'Y-m-d H:i:s';
+    private const DEFAULT_DATE_INTERVAL_FORMAT = '%R %Y %M %D %H %I %S %F';
 
     protected PropertyAccessorInterface $propertyAccessor;
     protected PropertyInfoExtractorInterface $propertyInfoExtractor;
@@ -147,46 +150,67 @@ class ParityChecker
 
         $resolver
             ->define(self::DATETIME_CHECK_FORMAT_KEY)
-            ->default(false)
+            ->default(true)
             ->allowedTypes('string', 'bool');
 
         $resolver
             ->define(self::DATE_INTERVAL_FORMAT_KEY)
-            ->default('%R %Y %M %D %H %I %S %F')
-            ->allowedTypes('string');
+            ->default(true)
+            ->allowedTypes('string', 'bool');
+
+        $resolver
+            ->define(self::DATE_TIME_ZONE_KEY)
+            ->default(true)
+            ->allowedTypes('bool');
 
         $resolver
             ->define(self::DATA_MAPPER_KEY)
             ->allowedTypes(ParityCheckerCallbackInterface::class . '[]')
             ->allowedValues($typeCallbackClosure)
-            ->default(static fn (Options $options): array => [
-                'internal_datetime_mapper' => new ParityCheckerCallback(
-                    [\DateTime::class, \DateTimeImmutable::class],
-                    static function ($dateTime) use ($options): string {
-                        /** @var \DateTime|\DateTimeImmutable $dateTime */
-                        $dateTime = $dateTime instanceof \DateTime
-                            ? \DateTimeImmutable::createFromMutable($dateTime)
-                            : $dateTime
-                        ;
+            ->default(static function (Options $options): array {
+                $mappers = [];
 
-                        $dateTime = $dateTime->setTimezone(new \DateTimeZone('UTC'));
+                if (false !== $options[self::DATETIME_CHECK_FORMAT_KEY]) {
+                    $mappers['internal_datetime_mapper'] = new ParityCheckerCallback(
+                        [\DateTime::class, \DateTimeImmutable::class],
+                        static function ($dateTime) use ($options): string {
+                            /** @var \DateTime|\DateTimeImmutable $dateTime */
+                            $dateTime = $dateTime instanceof \DateTime
+                                ? \DateTimeImmutable::createFromMutable($dateTime)
+                                : $dateTime
+                            ;
 
-                        return $dateTime->format(
-                            is_string($options[self::DATETIME_CHECK_FORMAT_KEY])
-                                ? $options[self::DATETIME_CHECK_FORMAT_KEY]
-                                : 'Y-m-d H:i:s'
-                        );
-                    }
-                ),
-                'internal_datetime_zone_mapper' => new ParityCheckerCallback(
-                    \DateTimeZone::class,
-                    static fn (\DateTimeZone $timeZone): string => $timeZone->getName(),
-                ),
-                'internal_date_interval_mapper' => new ParityCheckerCallback(
-                    \DateInterval::class,
-                    static fn (\DateInterval $interval): string => $interval->format($options[self::DATE_INTERVAL_FORMAT_KEY]),
-                ),
-            ]);
+                            $dateTime = $dateTime->setTimezone(new \DateTimeZone('UTC'));
+
+                            return $dateTime->format(
+                                is_string($options[self::DATETIME_CHECK_FORMAT_KEY])
+                                    ? $options[self::DATETIME_CHECK_FORMAT_KEY]
+                                    : self::DEFAULT_DATE_TIME_FORMAT
+                            );
+                        }
+                    );
+                }
+
+                if (false !== $options[self::DATE_INTERVAL_FORMAT_KEY]) {
+                    $mappers['internal_date_interval_mapper'] = new ParityCheckerCallback(
+                        \DateInterval::class,
+                        static fn (\DateInterval $interval): string => $interval->format(
+                            is_string($options[self::DATE_INTERVAL_FORMAT_KEY])
+                                ? $options[self::DATE_INTERVAL_FORMAT_KEY]
+                                : self::DEFAULT_DATE_INTERVAL_FORMAT
+                        ),
+                    );
+                }
+
+                if (false !== $options[self::DATE_TIME_ZONE_KEY]) {
+                    $mappers['internal_datetime_zone_mapper'] = new ParityCheckerCallback(
+                        \DateTimeZone::class,
+                        static fn (\DateTimeZone $timeZone): string => $timeZone->getName(),
+                    );
+                }
+
+                return $mappers;
+            });
 
         $resolver
             ->define(self::CALLBACK_CHECKER_KEY)
