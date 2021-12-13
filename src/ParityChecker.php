@@ -150,8 +150,6 @@ class ParityChecker
             ->allowedTypes('string', 'bool');
 
         $resolver
-
-        $resolver
             ->define(self::DATA_MAPPER_KEY)
             ->allowedTypes(ParityCheckerCallbackInterface::class . '[]')
             ->allowedValues($typeCallbackClosure)
@@ -172,6 +170,9 @@ class ParityChecker
                                 ? $options[self::DATETIME_CHECK_FORMAT_KEY]
                                 : 'Y-m-d H:i:s'
                         );
+                    }
+                ),
+            ]);
 
         $resolver
             ->define(self::CALLBACK_CHECKER_KEY)
