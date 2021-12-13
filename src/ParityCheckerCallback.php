@@ -15,8 +15,8 @@ class ParityCheckerCallback implements ParityCheckerCallbackInterface
 
     public function __construct($types, \Closure $closure)
     {
-        $this->setTypes($types);
-        $this->setClosure($closure);
+        $this->types = is_string($types) ? [$types] : $types;
+        $this->closure = $closure;
     }
 
     public function getTypes(): array
@@ -24,22 +24,8 @@ class ParityCheckerCallback implements ParityCheckerCallbackInterface
         return $this->types;
     }
 
-    public function setTypes($types): ParityCheckerCallback
-    {
-        $this->types = is_string($types) ? [$types] : $types;
-
-        return $this;
-    }
-
     public function getClosure(): \Closure
     {
         return $this->closure;
-    }
-
-    public function setClosure(\Closure $closure): ParityCheckerCallback
-    {
-        $this->closure = $closure;
-
-        return $this;
     }
 }
