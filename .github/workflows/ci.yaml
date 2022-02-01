@@ -16,9 +16,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: [7.4, 8.0, 8.1]
+        php: ['7.4', '8.0', '8.1']
+        symfony: ['5.4.*', '6.0.*', '']
+        
+        exclude: 
+          - { php: '7.4', symfony: '6.0.*' }
 
-    name: '🚧 Build application 🚧 | PHP ${{ matrix.php }}'
+    name: '🚧 Build application 🚧 | PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}'
 
     steps:
 
@@ -43,9 +47,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: '${{ steps.composer-cache.outputs.dir }}'
-          key: "${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json **/composer.lock') }}"
+          key: "${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-${{ hashFiles('**/composer.json **/composer.lock') }}"
           restore-keys: |
-            ${{ runner.os }}-php-${{ matrix.php }}-composer-
+            ${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-
+
+      - name: 'Restrict Symfony version'
+        if: matrix.symfony != ''
+        run: 'composer config extra.symfony.require "${{ matrix.symfony }}"'
 
       - name: 'Install dependencies'
         run: 'composer update --no-interaction --no-progress --prefer-dist --ansi --verbose --no-scripts'
@@ -73,9 +81,3 @@ jobs:
         with:
           percentage: 98
           filename: 'coverage.xml'
-
-      - uses: actions/cache@v2
-        with:
-          path: ~/.symfony/cache
-          key: ${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}
-          restore-keys: ${{ runner.os }}-php-
