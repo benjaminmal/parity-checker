@@ -27,10 +27,10 @@ jobs:
         steps:
             # --- ⚙️ Setup ⚙️ ----------
 
-            - name: Checkout
+            -   name: Checkout
                 uses: actions/checkout@v3
 
-            - name: Setup PHP
+            -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
                 with:
                     php-version: ${{ matrix.php }}
@@ -38,11 +38,11 @@ jobs:
                 env:
                     COMPOSER_TOKEN: ${{ secrets.PAT }}
 
-            - name: Get Composer cache directory
+            -   name: Get Composer cache directory
                 id: composer-cache
                 run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-            - name: Cache Composer
+            -   name: Cache Composer
                 uses: actions/cache@v2
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
@@ -51,31 +51,31 @@ jobs:
                         ${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-
                         ${{ runner.os }}-php
 
-            - name: Restrict Symfony version
+            -   name: Restrict Symfony version
                 if: matrix.symfony != 'none'
                 run: composer config extra.symfony.require "${{ matrix.symfony }}"
 
-            - name: Install dependencies
+            -   name: Install dependencies
                 run: composer update --no-interaction --no-progress --prefer-dist --ansi --verbose --no-scripts
 
               # --- 🛠 Test 🛠 ----------
 
-            - name: Validate composer.json and composer.lock
+            -   name: Validate composer.json and composer.lock
                 run: composer validate --strict --no-interaction --ansi --verbose
 
-            - name: Check for dump in code
+            -   name: Check for dump in code
                 run: vendor/bin/var-dump-check --symfony --exclude vendor --exclude tests .
 
-            - name: PHPStan analyse
+            -   name: PHPStan analyse
                 run: vendor/bin/phpstan analyse --configuration=phpstan-ci.neon --error-format=github --no-progress --no-interaction --ansi
 
-            - name: ECS check
+            -   name: ECS check
                 run: vendor/bin/ecs check src ecs.php --no-progress-bar --no-interaction --ansi
 
-            - name: PHPUnit tests
+            -   name: PHPUnit tests
                 run: vendor/bin/phpunit --verbose --coverage-clover ./coverage.xml --coverage-text --color=always --fail-on-incomplete --fail-on-risky --no-interaction --do-not-cache-result
 
-            - name: Coverage check
+            -   name: Coverage check
                 id: coverage-check
                 uses: johanvanhelden/gha-clover-test-coverage-check@v1
                 with:
