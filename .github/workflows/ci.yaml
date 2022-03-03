@@ -47,9 +47,10 @@ jobs:
         uses: actions/cache@v2
         with:
           path: '${{ steps.composer-cache.outputs.dir }}'
-          key: "${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-${{ hashFiles('**/composer.json **/composer.lock') }}"
+          key: "${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-${{ hashFiles('**/composer.json') }}"
           restore-keys: |
             ${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-
+            ${{ runner.os }}-php
 
       - name: 'Restrict Symfony version'
         if: matrix.symfony != ''
