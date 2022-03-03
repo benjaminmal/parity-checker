@@ -1,84 +1,83 @@
-name: 'Continuous integration'
+name: Continuous integration
 
 on:
-  pull_request: ~
-  workflow_dispatch: ~
-  release:
-    types: [created]
-  schedule:
-    - cron: '0 2 * * 1,4' # At 2am on Monday & Thursday
+    pull_request: ~
+    workflow_dispatch: ~
+    release:
+        types: [created]
+    schedule:
+        - cron: 0 2 * * 1,4 # At 2am on Monday & Thursday
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    build:
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
 
-    strategy:
-      fail-fast: false
-      matrix:
-        php: ['7.4', '8.0', '8.1']
-        symfony: ['5.4.*', '6.0.*', '']
-        
-        exclude: 
-          - { php: '7.4', symfony: '6.0.*' }
+        strategy:
+            fail-fast: false
+            matrix:
+                php: [7.4, 8.0, 8.1]
+                symfony: [5.4.*, 6.0.*, none]
 
-    name: '🚧 Build application 🚧 | PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}'
+                exclude:
+                    - { php: 7.4, symfony: 6.0.* }
 
-    steps:
+        name: 🚧 Build 🚧 | PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
 
-      # --- ⚙️ Setup ⚙️ ----------
+        steps:
+            # --- ⚙️ Setup ⚙️ ----------
 
-      - name: 'Checkout'
-        uses: actions/checkout@v3
+            - name: Checkout
+                uses: actions/checkout@v3
 
-      - name: 'Setup PHP'
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          coverage: pcov
-        env:
-          COMPOSER_TOKEN: ${{ secrets.PAT }}
+            - name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php }}
+                    coverage: pcov
+                env:
+                    COMPOSER_TOKEN: ${{ secrets.PAT }}
 
-      - name: 'Get Composer cache directory'
-        id: composer-cache
-        run: 'echo "::set-output name=dir::$(composer config cache-files-dir)"'
+            - name: Get Composer cache directory
+                id: composer-cache
+                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-      - name: 'Cache Composer'
-        uses: actions/cache@v2
-        with:
-          path: '${{ steps.composer-cache.outputs.dir }}'
-          key: "${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-${{ hashFiles('**/composer.json') }}"
-          restore-keys: |
-            ${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-
-            ${{ runner.os }}-php
+            - name: Cache Composer
+                uses: actions/cache@v2
+                with:
+                    path: ${{ steps.composer-cache.outputs.dir }}
+                    key: ${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-${{ hashFiles('**/composer.json') }}
+                    restore-keys: |
+                        ${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-
+                        ${{ runner.os }}-php
 
-      - name: 'Restrict Symfony version'
-        if: matrix.symfony != ''
-        run: 'composer config extra.symfony.require "${{ matrix.symfony }}"'
+            - name: Restrict Symfony version
+                if: matrix.symfony != 'none'
+                run: composer config extra.symfony.require "${{ matrix.symfony }}"
 
-      - name: 'Install dependencies'
-        run: 'composer update --no-interaction --no-progress --prefer-dist --ansi --verbose --no-scripts'
+            - name: Install dependencies
+                run: composer update --no-interaction --no-progress --prefer-dist --ansi --verbose --no-scripts
 
-      # --- 🛠 Test 🛠 ----------
+              # --- 🛠 Test 🛠 ----------
 
-      - name: 'Validate composer.json and composer.lock'
-        run: 'composer validate --strict --no-interaction --ansi --verbose'
+            - name: Validate composer.json and composer.lock
+                run: composer validate --strict --no-interaction --ansi --verbose
 
-      - name: 'Check for dump in code'
-        run: 'vendor/bin/var-dump-check --symfony --exclude vendor --exclude tests .'
+            - name: Check for dump in code
+                run: vendor/bin/var-dump-check --symfony --exclude vendor --exclude tests .
 
-      - name: 'PHPStan analyse'
-        run: 'vendor/bin/phpstan analyse --configuration=phpstan-ci.neon --error-format=github --no-progress --no-interaction --ansi'
+            - name: PHPStan analyse
+                run: vendor/bin/phpstan analyse --configuration=phpstan-ci.neon --error-format=github --no-progress --no-interaction --ansi
 
-      - name: 'ECS check'
-        run: 'vendor/bin/ecs check src ecs.php --no-progress-bar --no-interaction --ansi'
+            - name: ECS check
+                run: vendor/bin/ecs check src ecs.php --no-progress-bar --no-interaction --ansi
 
-      - name: 'PHPUnit tests'
-        run: 'vendor/bin/phpunit --verbose --coverage-clover ./coverage.xml --coverage-text --color=always --fail-on-incomplete --fail-on-risky --no-interaction --do-not-cache-result'
+            - name: PHPUnit tests
+                run: vendor/bin/phpunit --verbose --coverage-clover ./coverage.xml --coverage-text --color=always --fail-on-incomplete --fail-on-risky --no-interaction --do-not-cache-result
 
-      - name: Coverage check
-        id: coverage-check
-        uses: johanvanhelden/gha-clover-test-coverage-check@v1
-        with:
-          percentage: 98
-          filename: 'coverage.xml'
+            - name: Coverage check
+                id: coverage-check
+                uses: johanvanhelden/gha-clover-test-coverage-check@v1
+                with:
+                    percentage: 98
+                    filename: coverage.xml
