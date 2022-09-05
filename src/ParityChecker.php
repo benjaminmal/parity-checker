@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Elodgy\ParityChecker;
+namespace Benjaminmal\ParityChecker;
 
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;

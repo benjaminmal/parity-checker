@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Elodgy\ParityChecker\Tests;
+namespace Benjaminmal\ParityChecker\Tests;
 
-use Elodgy\ParityChecker\ParityChecker;
-use Elodgy\ParityChecker\ParityCheckerCallback;
-use Elodgy\ParityChecker\ParityError;
+use Benjaminmal\ParityChecker\ParityChecker;
+use Benjaminmal\ParityChecker\ParityCheckerCallback;
+use Benjaminmal\ParityChecker\ParityError;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 

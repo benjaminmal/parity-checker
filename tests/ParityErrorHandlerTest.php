@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Elodgy\ParityChecker\Tests;
+namespace Benjaminmal\ParityChecker\Tests;
 
-use Elodgy\ParityChecker\ParityError;
-use Elodgy\ParityChecker\ParityErrorHandler;
+use Benjaminmal\ParityChecker\ParityError;
+use Benjaminmal\ParityChecker\ParityErrorHandler;
 use PHPUnit\Framework\TestCase;
 
 class ParityErrorHandlerTest extends TestCase
