@@ -31,15 +31,10 @@ class ParityChecker
     private const DEFAULT_DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     private const DEFAULT_DATE_INTERVAL_FORMAT = '%R %Y %M %D %H %I %S %F';
 
-    protected PropertyAccessorInterface $propertyAccessor;
-    protected PropertyInfoExtractorInterface $propertyInfoExtractor;
-
     public function __construct(
-        PropertyAccessorInterface $propertyAccessor,
-        PropertyInfoExtractorInterface $propertyInfoExtractor
+        protected PropertyAccessorInterface $propertyAccessor,
+        protected PropertyInfoExtractorInterface $propertyInfoExtractor
     ) {
-        $this->propertyAccessor = $propertyAccessor;
-        $this->propertyInfoExtractor = $propertyInfoExtractor;
     }
 
     public static function create(): ParityChecker
@@ -73,11 +68,9 @@ class ParityChecker
     }
 
     /**
-     * @param mixed $value1
-     * @param mixed $value2
      * @param array<string, mixed> $options
      */
-    protected function checks($value1, $value2, string $property, array $options): bool
+    protected function checks(mixed $value1, mixed $value2, string $property, array $options): bool
     {
         if (array_key_exists(self::IGNORE_TYPES_KEY, $options)
             && $this->isTypeOrProperty($options[self::IGNORE_TYPES_KEY], $value1, $value2, $property)
@@ -291,10 +284,8 @@ class ParityChecker
 
     /**
      * @param string[]|string $type
-     * @param mixed $value1
-     * @param mixed $value2
      */
-    private function isTypeOrProperty($type, $value1, $value2, string $property): bool
+    private function isTypeOrProperty(array|string $type, mixed $value1, mixed $value2, string $property): bool
     {
         if (is_array($type)) {
             foreach ($type as $type1) {
@@ -401,12 +392,9 @@ class ParityChecker
         return $valuesByProperty;
     }
 
-    /**
-     * @return bool|string
-     */
-    private function isProperty(string $value)
+    private function isProperty(string $value): bool|string
     {
-        return '$' === substr($value, 0, 1) ? substr($value, 1) : false;
+        return str_starts_with($value, '$') ? substr($value, 1) : false;
     }
 
     private function isClassOrInterface(string $value): bool
@@ -414,10 +402,7 @@ class ParityChecker
         return (class_exists($value) || interface_exists($value));
     }
 
-    /**
-     * @return bool|string
-     */
-    private function isType(string $value)
+    private function isType(string $value): bool|string
     {
         $function = "is_$value";
 
@@ -427,7 +412,7 @@ class ParityChecker
     /**
      * @param string[]|string $values
      */
-    private function optionsTypeValidation($values): bool
+    private function optionsTypeValidation(array|string $values): bool
     {
         if (is_array($values)) {
             foreach ($values as $value) {
