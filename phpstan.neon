@@ -15,7 +15,7 @@ parameters:
       path: src/ParityChecker.php
 
     -
-      message: "#^Parameter \\#1 \\$type of method Elodgy\\\\ParityChecker\\\\ParityChecker\\:\\:isTypeOrProperty\\(\\) expects array\\<string\\>\\|string, mixed given\\.$#"
+      message: "#^Parameter \\#1 \\$type of method Benjaminmal\\\\ParityChecker\\\\ParityChecker\\:\\:isTypeOrProperty\\(\\) expects array\\<string\\>\\|string, mixed given\\.$#"
       count: 3
       path: src/ParityChecker.php
 

@@ -1,12 +1,12 @@
 {
-    "name": "elodgy/parity-checker",
+    "name": "benjaminmal/parity-checker",
     "description": "Parity checker",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "benjaminmal",
-            "email": "bbenben778@gmail.com"
+            "name": "Benjamin Malgras",
+            "role": "developer"
         }
     ],
     "require": {
@@ -18,7 +18,7 @@
         "webmozart/assert": "^1.10"
     },
     "require-dev": {
-        "elodgy/coding-standard": "^1.0",
+        "benjaminmal/coding-standard": "^1.0",
         "phpstan/phpstan": "^1.1",
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan-symfony": "^1.0",
@@ -37,12 +37,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Elodgy\\ParityChecker\\": "src/"
+            "Benjaminmal\\ParityChecker\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Elodgy\\ParityChecker\\Tests\\": "tests/"
+            "Benjaminmal\\ParityChecker\\Tests\\": "tests/"
         }
     },
     "scripts": {

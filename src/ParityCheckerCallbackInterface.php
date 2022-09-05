@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Elodgy\ParityChecker;
+namespace Benjaminmal\ParityChecker;
 
 interface ParityCheckerCallbackInterface
 {

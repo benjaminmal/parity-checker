@@ -7,7 +7,7 @@ A PHP parity checker. Useful when you want to check if many objects are having t
 Installation
 ------------
 ```bash
-$ composer require elodgy/parity-checker
+$ composer require benjaminmal/parity-checker
 ```
 
 Getting started
