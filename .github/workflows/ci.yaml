@@ -16,11 +16,8 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [7.4, 8.0, 8.1]
+                php: [8.0, 8.1]
                 symfony: [5.4.*, 6.0.*, none]
-
-                exclude:
-                    - { php: 7.4, symfony: 6.0.* }
 
         name: 🚧 Build 🚧 | PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
 

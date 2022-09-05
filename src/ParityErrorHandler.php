@@ -53,7 +53,7 @@ class ParityErrorHandler implements \IteratorAggregate, \ArrayAccess
         return isset($this->container[$offset]) || array_key_exists($offset, $this->container);
     }
 
-    public function offsetGet($offset)
+    public function offsetGet($offset): ?ParityError
     {
         return $this->container[$offset] ?? null;
     }
