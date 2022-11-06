@@ -21,7 +21,7 @@
         "benjaminmal/coding-standard": "^1.1.1",
         "phpstan/phpstan": "^1.9.0",
         "phpstan/extension-installer": "^1.2",
-        "phpstan/phpstan-symfony": "^1.2.14",
+        "phpstan/phpstan-symfony": "^1.2.15",
         "phpstan/phpstan-webmozart-assert": "^1.2.1",
         "symfony/var-dumper": "^5.4.14 || ^6.1.6",
         "phpunit/phpunit": "^9.5.26",
