@@ -18,8 +18,9 @@ jobs:
             matrix:
                 symfony: [5.4.*, 6.0.*, none]
                 php: [8.0, 8.1, 8.2]
+                lowest: ['', '--prefer-lowest']
 
-        name: 🚧 Build 🚧 | PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
+        name: 🚧 Build 🚧 | PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }} lowest ${{ matrix.lowest }}
 
         steps:
             # --- ⚙️ Setup ⚙️ ----------
@@ -53,7 +54,7 @@ jobs:
                 run: composer config extra.symfony.require "${{ matrix.symfony }}"
 
             -   name: Install dependencies
-                run: composer update --no-interaction --no-progress --prefer-dist --ansi --verbose --no-scripts
+                run: composer update ${{ matrix.lowest }} --no-interaction --no-progress --prefer-dist --ansi --verbose --no-scripts
 
               # --- 🛠 Test 🛠 ----------
 
