@@ -67,7 +67,7 @@ jobs:
                 run: vendor/bin/phpstan analyse --configuration=phpstan-ci.neon --error-format=github --no-progress --no-interaction --ansi
 
             -   name: ECS check
-                run: vendor/bin/ecs check src ecs.php --no-progress-bar --no-interaction --ansi
+                run: vendor/bin/ecs check --no-progress-bar --no-interaction --ansi
 
             -   name: PHPUnit tests
                 run: vendor/bin/phpunit --verbose --coverage-clover ./coverage.xml --coverage-text --color=always --fail-on-incomplete --fail-on-risky --no-interaction --do-not-cache-result
