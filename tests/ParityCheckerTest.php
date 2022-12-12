@@ -15,12 +15,12 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function checkParitySuccessWithSameProperty(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public string $param1 = 'hello';
             public int $param2 = 12;
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public string $param1 = 'hello';
             public int $param2 = 12;
         };
@@ -34,12 +34,12 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function checkParityFailsWithSamePropertyName(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public string $param1 = 'hell';
             public int $param2 = 12;
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public string $param1 = 'hello';
             public int $param2 = 10;
         };
@@ -66,12 +66,12 @@ class ParityCheckerTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Cannot found common properties.');
 
-        $object1 = new class () {
+        $object1 = new class() {
             public string $param1 = 'hell';
             public int $param2 = 12;
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public string $param3 = 'hello';
             public int $param4 = 10;
         };
@@ -86,7 +86,7 @@ class ParityCheckerTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('You must set at least 2 object to check.');
 
-        $object1 = new class () {
+        $object1 = new class() {
             public string $param1 = 'hell';
             public int $param2 = 12;
         };
@@ -97,11 +97,12 @@ class ParityCheckerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider noCheckOnTypesProvider
      */
     public function checkParityErrorsWithNoCheckOn($types, array $expectedErrorParams): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public string $param1 = 'mock_string';
             public int $param2 = 12;
             public float $param3 = 10.0;
@@ -111,7 +112,7 @@ class ParityCheckerTest extends TestCase
         };
         $object1->param6 = new \StdClass();
 
-        $object2 = new class () {
+        $object2 = new class() {
             public string $param1 = 'mock_string_1';
             public int $param2 = 10;
             public float $param3 = 10.1;
@@ -136,7 +137,7 @@ class ParityCheckerTest extends TestCase
         }
 
         foreach ($expectedErrorParams as $param) {
-            $properties = array_map(fn (ParityError $error) => $error->getProperty(), $errors->toArray());
+            $properties = array_map(static fn (ParityError $error) => $error->getProperty(), $errors->toArray());
             $this->assertTrue(in_array($param, $properties, true));
         }
     }
@@ -144,15 +145,15 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function checkParityWithLooseCheckOn(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public array $param3 = ['key1' => 'value1', 'key2' => 'value2'];
         };
 
-        $object2 = new class () {
-            public string $param1 = "12";
-            public string $param2 = "10.0";
+        $object2 = new class() {
+            public string $param1 = '12';
+            public string $param2 = '10.0';
             public array $param3 = ['key2' => 'value2', 'key1' => 'value1'];
         };
 
@@ -170,13 +171,13 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function checkParityWithCustomChecker(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public array $param3 = ['key1' => 'value1', 'key2' => 'value2'];
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public array $param3 = ['key1' => 'value1', 'key2' => 'value2'];
@@ -192,9 +193,9 @@ class ParityCheckerTest extends TestCase
             ParityChecker::CALLBACK_CHECKER_KEY => [
                 'myChecker' => new ParityCheckerCallback(
                     ['$param1', '$param2', '$param3'],
-                    fn ($value1, $value2, string $property, array $options): bool => false
+                    static fn ($value1, $value2, string $property, array $options): bool => false
                 ),
-            ]
+            ],
         ]);
 
         $this->assertCount(3, $errors);
@@ -215,9 +216,9 @@ class ParityCheckerTest extends TestCase
             ParityChecker::CALLBACK_CHECKER_KEY => [
                 'myChecker' => new ParityCheckerCallback(
                     ['$param1', '$param2', '$param3'],
-                    fn ($value1, $value2, string $property, array $options) => false,
+                    static fn ($value1, $value2, string $property, array $options) => false,
                 ),
-            ]
+            ],
         ]);
     }
 
@@ -258,46 +259,46 @@ class ParityCheckerTest extends TestCase
             ParityChecker::CALLBACK_CHECKER_KEY => [
                 'myChecker' => new ParityCheckerCallback(
                     ['mock_parameter', '$param2', '$param3'],
-                    fn ($value1, $value2, string $property, array $options): bool => false,
+                    static fn ($value1, $value2, string $property, array $options): bool => false,
                 ),
-            ]
+            ],
         ]);
     }
 
     /** @test */
     public function checkParityWithDeepObjectLimitAt2(): void
     {
-        $deepObject1 = new class () {
+        $deepObject1 = new class() {
             public int $param4 = 15;
             public float $param5 = 10.2;
             public object $childDeepObject;
         };
 
-        $deepObject2 = new class () {
+        $deepObject2 = new class() {
             public int $param4 = 15;
             public float $param5 = 10.2;
             public object $childDeepObject;
         };
 
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public array $param3 = ['key1' => 'value1', 'key2' => 'value2'];
             public object $deepObject;
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public array $param3 = ['key1' => 'value1', 'key2' => 'value2'];
             public object $deepObject;
         };
 
-        $deepObject1->childDeepObject = new class () {
+        $deepObject1->childDeepObject = new class() {
             public int $childParam1 = 20;
         };
 
-        $deepObject2->childDeepObject = new class () {
+        $deepObject2->childDeepObject = new class() {
             public int $childParam1 = 20;
         };
 
@@ -313,37 +314,37 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckWithFailDeepObject(): void
     {
-        $deepObject1 = new class () {
+        $deepObject1 = new class() {
             public int $param4 = 15;
             public float $param5 = 10.2;
             public object $childDeepObject;
         };
 
-        $deepObject2 = new class () {
+        $deepObject2 = new class() {
             public int $param4 = 15;
             public float $param5 = 10.2;
             public object $childDeepObject;
         };
 
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public array $param3 = ['key1' => 'value1', 'key2' => 'value2'];
             public object $deepObject;
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public array $param3 = ['key1' => 'value1', 'key2' => 'value2'];
             public object $deepObject;
         };
 
-        $deepObject1->childDeepObject = new class () {
+        $deepObject1->childDeepObject = new class() {
             public int $childParam1 = 21;
         };
 
-        $deepObject2->childDeepObject = new class () {
+        $deepObject2->childDeepObject = new class() {
             public int $childParam1 = 20;
         };
 
@@ -361,34 +362,36 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckWithDeepObjectException(): void
     {
-        $deepObject1 = new class () {
+        $deepObject1 = new class() {
             public int $param4 = 15;
             public float $param5 = 10.2;
             public object $childDeepObject;
         };
 
-        $deepObject2 = new class () {
+        $deepObject2 = new class() {
             public int $param4 = 15;
             public float $param5 = 10.2;
             public object $childDeepObject;
         };
 
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public array $param3 = ['key1' => 'value1', 'key2' => 'value2'];
             public object $deepObject;
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public array $param3 = ['key1' => 'value1', 'key2' => 'value2'];
             public object $deepObject;
         };
 
-        $deepObject1->childDeepObject = new class () {};
-        $deepObject2->childDeepObject = new class () {};
+        $deepObject1->childDeepObject = new class() {
+        };
+        $deepObject2->childDeepObject = new class() {
+        };
         $object1->deepObject = $deepObject1;
         $object2->deepObject = $deepObject2;
 
@@ -403,13 +406,13 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckWithProperty(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public array $param3 = ['key1' => 'value1', 'key2' => 'value2'];
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public string $param1 = '12';
             public string $param2 = '10.0';
             public array $param3 = ['key2' => 'value2', 'key1' => 'value1'];
@@ -425,13 +428,13 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckWithInterface(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public \DateTimeImmutable $param3;
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public string $param1 = '12';
             public string $param2 = '10.0';
             public \DateTimeImmutable $param3;
@@ -451,13 +454,13 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckWithClass(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public \DateTimeImmutable $param3;
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public string $param1 = '12';
             public string $param2 = '10.0';
             public \DateTimeImmutable $param3;
@@ -477,7 +480,7 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckWithType(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 10;
             public float $param2 = 10.1;
             public array $param3 = ['value'];
@@ -489,7 +492,7 @@ class ParityCheckerTest extends TestCase
             public $param9;
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public array $param3 = [];
@@ -527,13 +530,13 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckWithOnlyTypes(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public string $param3 = 'mock';
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public int $param1 = 99;
             public float $param2 = 99.9;
             public string $param3 = 'mock';
@@ -549,14 +552,14 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckWithOnlyTypesAndIgnoreTypes(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 12;
             public float $param2 = 10.0;
             public string $param3 = 'mock';
             public array $param4 = ['mock'];
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public int $param1 = 99;
             public float $param2 = 99.9;
             public string $param3 = 'mock';
@@ -576,26 +579,30 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckerWithDataMapper(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 99;
             public object $paramObject;
 
-            public function __construct() {
+            public function __construct()
+            {
                 $this->paramObject = new class() {
-                    public function getName(): string {
+                    public function getName(): string
+                    {
                         return 'hello';
                     }
                 };
             }
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public int $param1 = 99;
             public object $paramObject;
 
-            public function __construct() {
+            public function __construct()
+            {
                 $this->paramObject = new class() {
-                    public function getName(): string {
+                    public function getName(): string
+                    {
                         return 'hello';
                     }
                 };
@@ -608,7 +615,7 @@ class ParityCheckerTest extends TestCase
             ParityChecker::DATA_MAPPER_KEY => [
                 'myMapper' => new ParityCheckerCallback(
                     '$paramObject',
-                    fn (object $object): string => $object->getName(),
+                    static fn (object $object): string => $object->getName(),
                 ),
             ],
         ]);
@@ -620,26 +627,30 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckerWithDataMapperFails(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public int $param1 = 99;
             public object $paramObject;
 
-            public function __construct() {
+            public function __construct()
+            {
                 $this->paramObject = new class() {
-                    public function getName(): string {
+                    public function getName(): string
+                    {
                         return 'mock';
                     }
                 };
             }
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public int $param1 = 99;
             public object $paramObject;
 
-            public function __construct() {
+            public function __construct()
+            {
                 $this->paramObject = new class() {
-                    public function getName(): string {
+                    public function getName(): string
+                    {
                         return 'hello';
                     }
                 };
@@ -652,7 +663,7 @@ class ParityCheckerTest extends TestCase
             ParityChecker::DATA_MAPPER_KEY => [
                 'myMapper' => new ParityCheckerCallback(
                     '$paramObject',
-                    fn (object $object): string => $object->getName(),
+                    static fn (object $object): string => $object->getName(),
                 ),
             ],
         ]);
@@ -669,21 +680,23 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckerWithDateTimeDataMapperWithErrors(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public \DateTime $dateTime;
             public \DateTimeImmutable $dateTimeImmutable;
 
-            public function __construct() {
+            public function __construct()
+            {
                 $this->dateTime = new \DateTime('2021-06-21 12:00:00');
                 $this->dateTimeImmutable = new \DateTimeImmutable('2021-06-21 12:00:00');
             }
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public \DateTime $dateTime;
             public \DateTimeImmutable $dateTimeImmutable;
 
-            public function __construct() {
+            public function __construct()
+            {
                 $this->dateTime = new \DateTime('2021-06-21 10:00:00');
                 $this->dateTimeImmutable = new \DateTimeImmutable('2021-06-21 10:00:00');
             }
@@ -718,21 +731,23 @@ class ParityCheckerTest extends TestCase
         $dateTime = new \DateTime();
         $dateTimeImmutable = new \DateTimeImmutable();
 
-        $object1 = new class ($dateTime, $dateTimeImmutable) {
+        $object1 = new class($dateTime, $dateTimeImmutable) {
             public \DateTime $dateTime;
             public \DateTimeImmutable $dateTimeImmutable;
 
-            public function __construct(\DateTime $dateTime, \DateTimeImmutable $dateTimeImmutable) {
+            public function __construct(\DateTime $dateTime, \DateTimeImmutable $dateTimeImmutable)
+            {
                 $this->dateTime = $dateTime;
                 $this->dateTimeImmutable = $dateTimeImmutable;
             }
         };
 
-        $object2 = new class ($dateTime, $dateTimeImmutable) {
+        $object2 = new class($dateTime, $dateTimeImmutable) {
             public \DateTime $dateTime;
             public \DateTimeImmutable $dateTimeImmutable;
 
-            public function __construct(\DateTime $dateTime, \DateTimeImmutable $dateTimeImmutable) {
+            public function __construct(\DateTime $dateTime, \DateTimeImmutable $dateTimeImmutable)
+            {
                 $this->dateTime = $dateTime;
                 $this->dateTimeImmutable = $dateTimeImmutable;
             }
@@ -750,18 +765,20 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckerWithDateTimeDataMapperWithFormat(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public \DateTimeImmutable $dateTimeImmutable;
 
-            public function __construct() {
+            public function __construct()
+            {
                 $this->dateTimeImmutable = new \DateTimeImmutable('2021-02-01 05:00:00');
             }
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public \DateTimeImmutable $dateTimeImmutable;
 
-            public function __construct() {
+            public function __construct()
+            {
                 $this->dateTimeImmutable = new \DateTimeImmutable('2021-02-01 05:00:01');
             }
         };
@@ -780,18 +797,20 @@ class ParityCheckerTest extends TestCase
     {
         $dateTimeImmutable = new \DateTimeImmutable();
 
-        $object1 = new class ($dateTimeImmutable) {
+        $object1 = new class($dateTimeImmutable) {
             public \DateTimeImmutable $dateTimeImmutable;
 
-            public function __construct(\DateTimeImmutable $dateTimeImmutable) {
+            public function __construct(\DateTimeImmutable $dateTimeImmutable)
+            {
                 $this->dateTimeImmutable = $dateTimeImmutable->setTimezone(new \DateTimeZone('Europe/Paris'));
             }
         };
 
-        $object2 = new class ($dateTimeImmutable) {
+        $object2 = new class($dateTimeImmutable) {
             public \DateTimeImmutable $dateTimeImmutable;
 
-            public function __construct(\DateTimeImmutable $dateTimeImmutable) {
+            public function __construct(\DateTimeImmutable $dateTimeImmutable)
+            {
                 $this->dateTimeImmutable = $dateTimeImmutable->setTimezone(new \DateTimeZone('Australia/Melbourne'));
             }
         };
@@ -808,16 +827,18 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckerWithDateTimeZoneMapper(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public \DateTimeZone $timeZone;
-            public function __construct() {
+            public function __construct()
+            {
                 $this->timeZone = new \DateTimeZone('Europe/Paris');
             }
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public \DateTimeZone $timeZone;
-            public function __construct() {
+            public function __construct()
+            {
                 $this->timeZone = new \DateTimeZone('Europe/Paris');
             }
         };
@@ -833,16 +854,18 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckerWithDateTimeZoneMapperFails(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public \DateTimeZone $timeZone;
-            public function __construct() {
+            public function __construct()
+            {
                 $this->timeZone = new \DateTimeZone('Europe/Paris');
             }
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public \DateTimeZone $timeZone;
-            public function __construct() {
+            public function __construct()
+            {
                 $this->timeZone = new \DateTimeZone('Australia/Melbourne');
             }
         };
@@ -860,16 +883,18 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckerWithDateIntervalMapper(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public \DateInterval $interval;
-            public function __construct() {
+            public function __construct()
+            {
                 $this->interval = new \DateInterval('P1D');
             }
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public \DateInterval $interval;
-            public function __construct() {
+            public function __construct()
+            {
                 $this->interval = new \DateInterval('P1D');
             }
         };
@@ -885,16 +910,18 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckerWithDateIntervalMapperFails(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public \DateInterval $interval;
-            public function __construct() {
+            public function __construct()
+            {
                 $this->interval = new \DateInterval('P1D');
             }
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public \DateInterval $interval;
-            public function __construct() {
+            public function __construct()
+            {
                 $this->interval = new \DateInterval('P2D');
             }
         };
@@ -910,16 +937,18 @@ class ParityCheckerTest extends TestCase
     /** @test */
     public function parityCheckerWithDateIntervalMapperWithCustomFormat(): void
     {
-        $object1 = new class () {
+        $object1 = new class() {
             public \DateInterval $interval;
-            public function __construct() {
+            public function __construct()
+            {
                 $this->interval = new \DateInterval('P1D');
             }
         };
 
-        $object2 = new class () {
+        $object2 = new class() {
             public \DateInterval $interval;
-            public function __construct() {
+            public function __construct()
+            {
                 $this->interval = new \DateInterval('P2D');
             }
         };
@@ -947,7 +976,7 @@ class ParityCheckerTest extends TestCase
             [['string', 'int', 'float'], ['param4', 'param5', 'param6']],
             [['string', 'int', 'float', 'array'], ['param6']],
             [['string', 'int', 'float', 'array', 'iterable'], ['param6']],
-            [['string', 'int', 'float', 'array', 'iterable', \StdClass::class], []]
+            [['string', 'int', 'float', 'array', 'iterable', \StdClass::class], []],
         ];
     }
 }
