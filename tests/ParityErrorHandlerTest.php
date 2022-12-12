@@ -101,9 +101,8 @@ class ParityErrorHandlerTest extends TestCase
         $this->assertTrue(isset($handler[0]));
         $this->assertTrue(isset($handler[1]));
 
-        unset($handler[0]);
-        unset($handler[1]);
-
+        unset($handler[0], $handler[1]);
+        
         $this->assertFalse(isset($handler[0]));
         $this->assertFalse(isset($handler[1]));
     }
@@ -119,9 +118,8 @@ class ParityErrorHandlerTest extends TestCase
         $this->assertTrue(isset($handler['key1']));
         $this->assertTrue(isset($handler['key2']));
 
-        unset($handler['key1']);
-        unset($handler['key2']);
-
+        unset($handler['key1'], $handler['key2']);
+        
         $this->assertFalse(isset($handler['key1']));
         $this->assertFalse(isset($handler['key2']));
     }
