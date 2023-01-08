@@ -18,7 +18,7 @@
         "webmozart/assert": "^1.10"
     },
     "require-dev": {
-        "phpstan/phpstan": "^1.9.4",
+        "phpstan/phpstan": "^1.9.7",
         "e-lodgy/coding-standard": "^1.1.5",
         "phpstan/extension-installer": "^1.2",
         "phpstan/phpstan-symfony": "^1.2.19",
