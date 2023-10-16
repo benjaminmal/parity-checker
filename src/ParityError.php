@@ -11,7 +11,7 @@ class ParityError
         private object $object2,
         private string $property,
         private mixed $object1Value,
-        private mixed $object2Value
+        private mixed $object2Value,
     ) {
     }
 

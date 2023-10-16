@@ -20,9 +20,7 @@ class ParityChecker
     public const LOOSE_CHECK_TYPES_KEY = 'loose_types';
     public const DEEP_OBJECT_LIMIT_KEY = 'deep_object_limit';
     public const CALLBACK_CHECKER_KEY = 'callback_checker';
-    public const CALLBACK_CLOSURE_KEY = 'closure';
     public const DATA_MAPPER_KEY = 'data_mapper';
-    public const DATA_MAPPER_CLOSURE_KEY = 'closure';
     public const DATETIME_CHECK_FORMAT_KEY = 'datetime_check_format';
     public const DATE_INTERVAL_FORMAT_KEY = 'date_interval_format';
     public const DATE_TIME_ZONE_KEY = 'datetime_zone';
@@ -33,7 +31,7 @@ class ParityChecker
 
     public function __construct(
         protected PropertyAccessorInterface $propertyAccessor,
-        protected PropertyInfoExtractorInterface $propertyInfoExtractor
+        protected PropertyInfoExtractorInterface $propertyInfoExtractor,
     ) {
     }
 
@@ -178,9 +176,9 @@ class ParityChecker
                             return $dateTime->format(
                                 is_string($options[self::DATETIME_CHECK_FORMAT_KEY])
                                     ? $options[self::DATETIME_CHECK_FORMAT_KEY]
-                                    : self::DEFAULT_DATE_TIME_FORMAT
+                                    : self::DEFAULT_DATE_TIME_FORMAT,
                             );
-                        }
+                        },
                     );
                 }
 
@@ -190,7 +188,7 @@ class ParityChecker
                         static fn (\DateInterval $interval): string => $interval->format(
                             is_string($options[self::DATE_INTERVAL_FORMAT_KEY])
                                 ? $options[self::DATE_INTERVAL_FORMAT_KEY]
-                                : self::DEFAULT_DATE_INTERVAL_FORMAT
+                                : self::DEFAULT_DATE_INTERVAL_FORMAT,
                         ),
                     );
                 }
@@ -210,7 +208,7 @@ class ParityChecker
             ->allowedTypes(ParityCheckerCallbackInterface::class . '[]')
             ->allowedValues(
                 static fn (iterable $checkers): bool
-                => $typeCallbackClosure($checkers) && $boolClosureReturnTypeClosure($checkers)
+                => $typeCallbackClosure($checkers) && $boolClosureReturnTypeClosure($checkers),
             )
         ;
     }
@@ -250,7 +248,7 @@ class ParityChecker
                         $errorsHandlerRecursive = $this->doCheckParity(
                             [$valueToTest, $value],
                             $options,
-                            $recursionCount
+                            $recursionCount,
                         );
 
                         $errorsHandler->addMultiples($errorsHandlerRecursive);
@@ -260,7 +258,7 @@ class ParityChecker
                             $value,
                             $property,
                             $valueToTest,
-                            $value
+                            $value,
                         );
                     }
 
@@ -273,7 +271,7 @@ class ParityChecker
                         $objects[$objectKey],
                         $property,
                         $valueToTest,
-                        $value
+                        $value,
                     );
                 }
             }
