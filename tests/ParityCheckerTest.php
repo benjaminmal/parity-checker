@@ -193,7 +193,7 @@ class ParityCheckerTest extends TestCase
             ParityChecker::CALLBACK_CHECKER_KEY => [
                 'myChecker' => new ParityCheckerCallback(
                     ['$param1', '$param2', '$param3'],
-                    static fn ($value1, $value2, string $property, array $options): bool => false
+                    static fn ($value1, $value2, string $property, array $options): bool => false,
                 ),
             ],
         ]);
@@ -221,28 +221,6 @@ class ParityCheckerTest extends TestCase
             ],
         ]);
     }
-
-//    Only do this check when moving to PHP >= 8
-//    /** @test */
-//    public function checkParityWithCustomCheckerAndInvalidType(): void
-//    {
-//        $this->expectException(InvalidArgumentException::class);
-//        $this->expectExceptionMessage('The callback closure must return only a boolean.');
-//
-//        $object = new class() {
-//            public int $param1;
-//        };
-//
-//        $parityChecker = ParityChecker::create();
-//        $parityChecker->checkParity([$object, clone $object], [
-//            ParityChecker::CALLBACK_CHECKER_KEY => [
-//                'myChecker' => new ParityCheckerCallback(
-//                    ['$param1', '$param2', '$param3'],
-//                    fn ($value1, $value2, string $property, array $options): bool|array => false
-//                ),
-//            ]
-//        ]);
-//    }
 
     /** @test */
     public function checkParityWithCustomCheckerAndWrongType(): void
